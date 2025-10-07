@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Document Intelligence - CompliSense AI</title>
+
+  <link rel="stylesheet" href="styles/aia-theme.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <style>
+    .documents-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: var(--space-xl);
+    }
+
+    .upload-zone {
+      background: white;
+      border: 3px dashed var(--gray-300);
+      border-radius: var(--radius-lg);
+      padding: var(--space-2xl);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: var(--space-xl);
+    }
+
+    .upload-zone:hover {
+      border-color: var(--aia-red);
+      background: var(--gray-50);
+    }
+
+    .upload-zone.dragover {
+      border-color: var(--aia-red);
+      background: var(--aia-red-light);
+      opacity: 0.1;
+    }
+
+    .upload-icon {
+      font-size: 64px;
+      margin-bottom: var(--space-md);
+    }
+
+    .document-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-xl);
+    }
+
+    .document-preview {
+      background: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+    }
+
+    .document-header {
+      background: var(--gray-100);
+      padding: var(--space-lg);
+      border-bottom: 2px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .document-title {
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    .document-image {
+      width: 100%;
+      height: 400px;
+      object-fit: contain;
+      background: var(--gray-50);
+      padding: var(--space-lg);
+    }
+
+    .extraction-results {
+      padding: var(--space-lg);
+    }
+
+    .extraction-status {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-lg);
+      padding: var(--space-md);
+      background: var(--success-bg);
+      border-radius: var(--radius-md);
+      color: var(--success-text);
+    }
+
+    .extraction-status.processing {
+      background: var(--info-bg);
+      color: var(--info-text);
+    }
+
+    .extraction-status.error {
+      background: var(--error-bg);
+      color: var(--error-text);
+    }
+
+    .extracted-fields {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .extracted-field {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-md);
+      background: var(--gray-50);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--gray-200);
+    }
+
+    .field-label {
+      font-size: var(--font-size-sm);
+      color: var(--gray-600);
+      font-weight: 500;
+    }
+
+    .field-value {
+      font-weight: 700;
+      color: var(--gray-900);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .field-confidence {
+      font-size: var(--font-size-xs);
+      color: var(--gray-500);
+      background: white;
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+    }
+
+    .validation-alert {
+      margin-top: var(--space-lg);
+      padding: var(--space-lg);
+      background: var(--warning-bg);
+      border: 2px solid var(--warning-border);
+      border-radius: var(--radius-md);
+    }
+
+    .validation-alert h4 {
+      color: var(--warning-text);
+      margin-bottom: var(--space-sm);
+    }
+
+    .validation-alert ul {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--gray-700);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: var(--space-sm);
+      margin-top: var(--space-lg);
+      padding-top: var(--space-lg);
+      border-top: 1px solid var(--gray-200);
+    }
+
+    .processing-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .processing-overlay.active {
+      display: flex;
+    }
+
+    .processing-content {
+      background: white;
+      padding: var(--space-2xl);
+      border-radius: var(--radius-lg);
+      text-align: center;
+      max-width: 400px;
+    }
+
+    .processing-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid var(--gray-200);
+      border-top-color: var(--aia-red);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto var(--space-lg);
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .processing-steps {
+      text-align: left;
+      margin-top: var(--space-lg);
+    }
+
+    .processing-step {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) 0;
+      color: var(--gray-600);
+    }
+
+    .processing-step.active {
+      color: var(--aia-red);
+      font-weight: 600;
+    }
+
+    .processing-step.complete {
+      color: #10B981;
+    }
+
+    .sample-documents {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-md);
+      margin-top: var(--space-lg);
+    }
+
+    .sample-doc-card {
+      background: white;
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .sample-doc-card:hover {
+      border-color: var(--aia-red);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .sample-doc-icon {
+      font-size: 48px;
+      margin-bottom: var(--space-sm);
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span style="font-size: 28px;">🧠</span>
+      <span>CompliSense AI</span>
+    </a>
+    <ul class="navbar-menu">
+      <li><a href="index.html">FHR Form</a></li>
+      <li><a href="products.html">Products</a></li>
+      <li><a href="portfolio.html">Portfolio</a></li>
+      <li class="nav-dropdown">
+        <span class="nav-dropdown-toggle">AI Tools ▾</span>
+        <div class="nav-dropdown-menu">
+          <a href="copilot.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">💬</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">AI Copilot</div>
+              <div class="nav-dropdown-item-desc">Chat compliance assistant</div>
+            </div>
+          </a>
+          <a href="analytics.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">📈</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Performance Analytics</div>
+              <div class="nav-dropdown-item-desc">Track metrics & anomalies</div>
+            </div>
+          </a>
+          <a href="graph.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">🕸️</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Compliance Graph</div>
+              <div class="nav-dropdown-item-desc">Visualize relationships</div>
+            </div>
+          </a>
+          <a href="documents.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">📄</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Document Intelligence</div>
+              <div class="nav-dropdown-item-desc">OCR & extraction</div>
+            </div>
+          </a>
+          <a href="regulatory.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">🔔</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Regulatory Updates</div>
+              <div class="nav-dropdown-item-desc">Latest MAS notices</div>
+            </div>
+          </a>
+        </div>
+      </li>
+      <li><a href="supervisor.html">Supervisor</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <span class="text-gray">Agent: <strong>MAHADEVAN KARTIK</strong></span>
+      
+    </div>
+  </nav>
+
+  <!-- Documents Container -->
+  <div class="documents-container">
+    <!-- Header -->
+    <div style="margin-bottom: var(--space-xl);">
+      <h1 style="margin-bottom: var(--space-sm);">📄 Document Intelligence</h1>
+      <p style="color: var(--gray-600); font-size: var(--font-size-lg);">
+        Upload client documents to automatically extract and validate financial information using AI-powered OCR
+      </p>
+    </div>
+
+    <!-- Alert -->
+    <div class="alert alert-info" style="margin-bottom: var(--space-xl);">
+      <span class="alert-icon">💡</span>
+      <div class="alert-content">
+        <div class="alert-title">Supported Documents</div>
+        <div>Payslips, Bank Statements, CPF Statements, Employment Letters, NRIC/Passport. Supports handwritten and typed documents in English, Chinese, and Malay.</div>
+      </div>
+    </div>
+
+    <!-- Upload Zone -->
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+      <div class="upload-icon">📤</div>
+      <h3>Drag & Drop Documents Here</h3>
+      <p style="color: var(--gray-600); margin-top: var(--space-sm);">or click to browse files</p>
+      <p style="color: var(--gray-500); font-size: var(--font-size-sm); margin-top: var(--space-md);">
+        Supported formats: JPG, PNG, PDF • Max size: 10MB
+      </p>
+      <input type="file" id="fileInput" style="display: none;" accept="image/*,.pdf" multiple onchange="handleFileUpload(event)">
+    </div>
+
+    <!-- Sample Documents -->
+    <div style="margin-bottom: var(--space-2xl);">
+      <h3 style="margin-bottom: var(--space-md);">Try Sample Documents</h3>
+      <div class="sample-documents">
+        <div class="sample-doc-card" onclick="processSampleDocument('payslip')">
+          <div class="sample-doc-icon">💵</div>
+          <div style="font-weight: 600; margin-bottom: 4px;">Payslip</div>
+          <div style="font-size: var(--font-size-xs); color: var(--gray-600);">Demo extraction</div>
+        </div>
+        <div class="sample-doc-card" onclick="processSampleDocument('bank')">
+          <div class="sample-doc-icon">🏦</div>
+          <div style="font-weight: 600; margin-bottom: 4px;">Bank Statement</div>
+          <div style="font-size: var(--font-size-xs); color: var(--gray-600);">Demo extraction</div>
+        </div>
+        <div class="sample-doc-card" onclick="processSampleDocument('cpf')">
+          <div class="sample-doc-icon">📊</div>
+          <div style="font-weight: 600; margin-bottom: 4px;">CPF Statement</div>
+          <div style="font-size: var(--font-size-xs); color: var(--gray-600);">Demo extraction</div>
+        </div>
+        <div class="sample-doc-card" onclick="processSampleDocument('nric')">
+          <div class="sample-doc-icon">🆔</div>
+          <div style="font-weight: 600; margin-bottom: 4px;">NRIC</div>
+          <div style="font-size: var(--font-size-xs); color: var(--gray-600);">Demo extraction</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Document Preview Grid -->
+    <div class="document-grid" id="documentGrid" style="display: none;">
+      <!-- Document 1: Payslip -->
+      <div class="document-preview">
+        <div class="document-header">
+          <div>
+            <div class="document-title">Payslip - November 2025</div>
+            <div style="font-size: var(--font-size-xs); color: var(--gray-600); margin-top: 2px;">
+              Uploaded 2 seconds ago
+            </div>
+          </div>
+          <span class="badge badge-success">Processed</span>
+        </div>
+
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 500'%3E%3Crect fill='%23f9fafb' width='400' height='500'/%3E%3Crect fill='white' x='20' y='20' width='360' height='460' rx='8'/%3E%3Crect fill='%23C5193B' x='20' y='20' width='360' height='60' rx='8 8 0 0'/%3E%3Ctext x='200' y='55' text-anchor='middle' fill='white' font-size='20' font-weight='bold'%3ECompany Payslip%3C/text%3E%3Ctext x='40' y='120' fill='%23374151' font-size='14'%3EEmployee: Tan Wei Ming%3C/text%3E%3Ctext x='40' y='150' fill='%23374151' font-size='14'%3EPeriod: Nov 2025%3C/text%3E%3Ctext x='40' y='200' fill='%236B7280' font-size='12'%3EBasic Salary%3C/text%3E%3Ctext x='360' y='200' text-anchor='end' fill='%23111827' font-size='14' font-weight='bold'%3E$4,850.00%3C/text%3E%3Ctext x='40' y='230' fill='%236B7280' font-size='12'%3ECPF (Employee)%3C/text%3E%3Ctext x='360' y='230' text-anchor='end' fill='%23EF4444' font-size='14'%3E-$970.00%3C/text%3E%3Crect x='40' y='250' width='320' height='1' fill='%23E5E7EB'/%3E%3Ctext x='40' y='280' fill='%23111827' font-size='14' font-weight='bold'%3ENet Pay%3C/text%3E%3Ctext x='360' y='280' text-anchor='end' fill='%2310B981' font-size='18' font-weight='bold'%3E$3,880.00%3C/text%3E%3C/svg%3E" alt="Payslip" class="document-image">
+
+        <div class="extraction-results">
+          <div class="extraction-status">
+            <span>✅</span>
+            <strong>OCR Complete</strong> - Extracted 8 fields with 97% average confidence
+          </div>
+
+          <div class="extracted-fields">
+            <div class="extracted-field">
+              <span class="field-label">Employee Name</span>
+              <div class="field-value">
+                Tan Wei Ming
+                <span class="field-confidence">99% confidence</span>
+              </div>
+            </div>
+
+            <div class="extracted-field">
+              <span class="field-label">Monthly Salary (Gross)</span>
+              <div class="field-value">
+                $4,850
+                <span class="field-confidence">98% confidence</span>
+              </div>
+            </div>
+
+            <div class="extracted-field">
+              <span class="field-label">CPF Contribution</span>
+              <div class="field-value">
+                $970
+                <span class="field-confidence">97% confidence</span>
+              </div>
+            </div>
+
+            <div class="extracted-field">
+              <span class="field-label">Net Pay</span>
+              <div class="field-value">
+                $3,880
+                <span class="field-confidence">96% confidence</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="validation-alert">
+            <h4>⚠️ Cross-Validation Alert</h4>
+            <ul>
+              <li>Client declared income: <strong>$5,000/month</strong></li>
+              <li>Payslip extracted: <strong>$4,850/month</strong></li>
+              <li><strong>Discrepancy: -$150 (3%)</strong></li>
+            </ul>
+            <p style="margin-top: var(--space-md); margin-bottom: 0; font-size: var(--font-size-sm); color: var(--gray-700);">
+              <strong>Recommendation:</strong> Verify with client. Small discrepancy may be due to rounding or variable allowances. Update FHR form with actual payslip amount for accuracy.
+            </p>
+          </div>
+
+          <div class="action-buttons">
+            <button class="btn btn-primary" onclick="applyToForm('payslip')">
+              Apply to FHR Form
+            </button>
+            <button class="btn btn-ghost">
+              Download Report
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Document 2: Bank Statement -->
+      <div class="document-preview">
+        <div class="document-header">
+          <div>
+            <div class="document-title">Bank Statement - November 2025</div>
+            <div style="font-size: var(--font-size-xs); color: var(--gray-600); margin-top: 2px;">
+              Uploaded 1 second ago
+            </div>
+          </div>
+          <span class="badge badge-success">Processed</span>
+        </div>
+
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 500'%3E%3Crect fill='%23f9fafb' width='400' height='500'/%3E%3Crect fill='white' x='20' y='20' width='360' height='460' rx='8'/%3E%3Crect fill='%232563EB' x='20' y='20' width='360' height='60' rx='8 8 0 0'/%3E%3Ctext x='200' y='55' text-anchor='middle' fill='white' font-size='20' font-weight='bold'%3EDBS Bank%3C/text%3E%3Ctext x='40' y='120' fill='%23374151' font-size='14'%3EAccount Holder: Tan Wei Ming%3C/text%3E%3Ctext x='40' y='150' fill='%23374151' font-size='14'%3EAccount: ****-1234%3C/text%3E%3Ctext x='40' y='200' fill='%2310B981' font-size='18' font-weight='bold'%3EBalance: $12,450.00%3C/text%3E%3Ctext x='40' y='240' fill='%236B7280' font-size='12'%3ERecent Transactions:%3C/text%3E%3Ctext x='40' y='270' fill='%23374151' font-size='11'%3E05-Nov: Salary Credit +$4,850%3C/text%3E%3Ctext x='40' y='295' fill='%23374151' font-size='11'%3E10-Nov: Rent Payment -$1,800%3C/text%3E%3Ctext x='40' y='320' fill='%23374151' font-size='11'%3E15-Nov: Groceries -$350%3C/text%3E%3Ctext x='40' y='345' fill='%23374151' font-size='11'%3E20-Nov: Insurance -$650%3C/text%3E%3C/svg%3E" alt="Bank Statement" class="document-image">
+
+        <div class="extraction-results">
+          <div class="extraction-status">
+            <span>✅</span>
+            <strong>OCR Complete</strong> - Extracted 6 fields with 95% average confidence
+          </div>
+
+          <div class="extracted-fields">
+            <div class="extracted-field">
+              <span class="field-label">Account Holder</span>
+              <div class="field-value">
+                Tan Wei Ming
+                <span class="field-confidence">99% confidence</span>
+              </div>
+            </div>
+
+            <div class="extracted-field">
+              <span class="field-label">Current Balance</span>
+              <div class="field-value">
+                $12,450
+                <span class="field-confidence">98% confidence</span>
+              </div>
+            </div>
+
+            <div class="extracted-field">
+              <span class="field-label">Avg Monthly Inflow</span>
+              <div class="field-value">
+                $4,850
+                <span class="field-confidence">94% confidence</span>
+              </div>
+            </div>
+
+            <div class="extracted-field">
+              <span class="field-label">Avg Monthly Expenses</span>
+              <div class="field-value">
+                $3,200
+                <span class="field-confidence">92% confidence</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="validation-alert" style="background: var(--success-bg); border-color: var(--success-border);">
+            <h4 style="color: var(--success-text);">✅ Validation Passed</h4>
+            <ul>
+              <li>Bank balance ($12,450) provides <strong>3.9 months</strong> emergency fund coverage</li>
+              <li>Meets MoneySense minimum 3-month requirement ✓</li>
+              <li>Average expenses ($3,200) match FHR declaration ✓</li>
+            </ul>
+          </div>
+
+          <div class="action-buttons">
+            <button class="btn btn-primary" onclick="applyToForm('bank')">
+              Apply to FHR Form
+            </button>
+            <button class="btn btn-ghost">
+              Download Report
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Processing Overlay -->
+  <div class="processing-overlay" id="processingOverlay">
+    <div class="processing-content">
+      <div class="processing-spinner"></div>
+      <h3>Processing Documents...</h3>
+      <p style="color: var(--gray-600); margin-top: var(--space-sm);">
+        AI is analyzing your documents
+      </p>
+
+      <div class="processing-steps">
+        <div class="processing-step complete">
+          <span>✓</span> Upload complete
+        </div>
+        <div class="processing-step complete">
+          <span>✓</span> Image preprocessing
+        </div>
+        <div class="processing-step active">
+          <span>⚙️</span> OCR text extraction
+        </div>
+        <div class="processing-step">
+          <span>○</span> Data validation
+        </div>
+        <div class="processing-step">
+          <span>○</span> Cross-checking with FHR
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const uploadZone = document.getElementById('uploadZone');
+    const documentGrid = document.getElementById('documentGrid');
+    const processingOverlay = document.getElementById('processingOverlay');
+
+    // Drag and drop handlers
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('dragover');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+      handleFileUpload({ target: { files: e.dataTransfer.files } });
+    });
+
+    // Handle file upload
+    function handleFileUpload(event) {
+      const files = event.target.files;
+      if (files.length === 0) return;
+
+      // Show processing overlay
+      processingOverlay.classList.add('active');
+
+      // Simulate processing steps
+      const steps = document.querySelectorAll('.processing-step');
+      let currentStep = 2;
+
+      const interval = setInterval(() => {
+        if (currentStep < steps.length) {
+          steps[currentStep - 1].classList.remove('active');
+          steps[currentStep - 1].classList.add('complete');
+          steps[currentStep].classList.add('active');
+          currentStep++;
+        } else {
+          clearInterval(interval);
+          setTimeout(() => {
+            processingOverlay.classList.remove('active');
+            documentGrid.style.display = 'grid';
+            window.scrollTo({ top: documentGrid.offsetTop - 100, behavior: 'smooth' });
+          }, 500);
+        }
+      }, 800);
+    }
+
+    // Process sample document
+    function processSampleDocument(type) {
+      processingOverlay.classList.add('active');
+
+      // Reset steps
+      const steps = document.querySelectorAll('.processing-step');
+      steps.forEach((step, index) => {
+        step.classList.remove('active', 'complete');
+        if (index < 2) step.classList.add('complete');
+        if (index === 2) step.classList.add('active');
+      });
+
+      // Simulate processing
+      let currentStep = 2;
+      const interval = setInterval(() => {
+        if (currentStep < steps.length) {
+          steps[currentStep - 1].classList.remove('active');
+          steps[currentStep - 1].classList.add('complete');
+          steps[currentStep].classList.add('active');
+          currentStep++;
+        } else {
+          clearInterval(interval);
+          setTimeout(() => {
+            processingOverlay.classList.remove('active');
+            documentGrid.style.display = 'grid';
+            window.scrollTo({ top: documentGrid.offsetTop - 100, behavior: 'smooth' });
+          }, 500);
+        }
+      }, 800);
+    }
+
+    // Apply to form
+    function applyToForm(docType) {
+      if (docType === 'payslip') {
+        alert('✅ Data Applied to FHR Form\n\nThe following fields have been updated:\n\n• Monthly Income: $4,850 (from payslip)\n• CPF Contribution: $970\n• Net Income: $3,880\n\n⚠️ Note: Detected $150 discrepancy with original declaration. Please verify with client.\n\nReturning to FHR form...');
+      } else if (docType === 'bank') {
+        alert('✅ Data Applied to FHR Form\n\nThe following fields have been updated:\n\n• Emergency Fund: $12,450 (from bank statement)\n• Monthly Expenses: $3,200 (calculated average)\n• Emergency Fund Coverage: 3.9 months ✓\n\nReturning to FHR form...');
+      }
+
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 1000);
+    }
+  </script>
+  <!-- Floating Chat Widget -->
+  <div class="chat-widget">
+    <button class="chat-widget-button" onclick="window.location.href='copilot.html'" title="Ask AI Copilot">
+      💬
+    </button>
+    <div class="chat-widget-tooltip">Ask AI Copilot</div>
+  </div>
+
+</body>
+</html>

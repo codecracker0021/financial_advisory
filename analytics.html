@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Behavioral Analytics - CompliSense AI</title>
+
+  <link rel="stylesheet" href="styles/aia-theme.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <style>
+    .analytics-container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: var(--space-xl);
+    }
+
+    .agent-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: var(--space-xl);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-xl);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .agent-info h2 {
+      margin: 0 0 var(--space-sm) 0;
+      font-size: var(--font-size-3xl);
+    }
+
+    .agent-info p {
+      margin: 0;
+      opacity: 0.9;
+    }
+
+    .performance-score {
+      text-align: center;
+    }
+
+    .performance-score-value {
+      font-size: 56px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .performance-score-label {
+      font-size: var(--font-size-sm);
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--space-lg);
+      margin-bottom: var(--space-xl);
+    }
+
+    .metric-card-large {
+      background: white;
+      padding: var(--space-xl);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-card-large::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+    }
+
+    .metric-card-large.good::before {
+      background: #10B981;
+    }
+
+    .metric-card-large.warning::before {
+      background: #F59E0B;
+    }
+
+    .metric-card-large.danger::before {
+      background: #EF4444;
+    }
+
+    .metric-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: var(--space-md);
+    }
+
+    .metric-icon.good {
+      background: var(--success-bg);
+    }
+
+    .metric-icon.warning {
+      background: var(--warning-bg);
+    }
+
+    .metric-icon.danger {
+      background: var(--error-bg);
+    }
+
+    .metric-title {
+      font-size: var(--font-size-sm);
+      color: var(--gray-600);
+      margin-bottom: var(--space-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .metric-main-value {
+      font-size: var(--font-size-4xl);
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: var(--space-sm);
+    }
+
+    .metric-comparison {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: var(--font-size-sm);
+    }
+
+    .metric-comparison.positive {
+      color: #10B981;
+    }
+
+    .metric-comparison.negative {
+      color: #EF4444;
+    }
+
+    .trend-indicator {
+      font-weight: 700;
+    }
+
+    .chart-card {
+      background: white;
+      padding: var(--space-xl);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: var(--space-xl);
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-lg);
+    }
+
+    .chart-title {
+      font-size: var(--font-size-xl);
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    .time-filter {
+      display: flex;
+      gap: var(--space-sm);
+    }
+
+    .time-filter-btn {
+      padding: 6px 12px;
+      border: 1px solid var(--gray-300);
+      background: white;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-size: var(--font-size-sm);
+      transition: all 0.2s ease;
+    }
+
+    .time-filter-btn.active {
+      background: var(--aia-red);
+      color: white;
+      border-color: var(--aia-red);
+    }
+
+    .line-chart {
+      height: 250px;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      padding: var(--space-lg) 0;
+      border-bottom: 2px solid var(--gray-200);
+    }
+
+    .line-bar {
+      flex: 1;
+      background: linear-gradient(180deg, var(--aia-red-light) 0%, var(--aia-red) 100%);
+      border-radius: 4px 4px 0 0;
+      position: relative;
+      transition: height 0.5s ease;
+      min-height: 20px;
+    }
+
+    .line-bar:hover {
+      opacity: 0.8;
+    }
+
+    .line-bar-label {
+      position: absolute;
+      bottom: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: var(--font-size-xs);
+      color: var(--gray-600);
+      white-space: nowrap;
+    }
+
+    .alert-card {
+      background: white;
+      border-left: 4px solid #F59E0B;
+      padding: var(--space-lg);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: var(--space-md);
+    }
+
+    .alert-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-bottom: var(--space-sm);
+    }
+
+    .alert-icon {
+      font-size: 24px;
+    }
+
+    .alert-title {
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    .alert-message {
+      color: var(--gray-700);
+      font-size: var(--font-size-sm);
+      line-height: 1.6;
+      margin-bottom: var(--space-md);
+    }
+
+    .alert-actions {
+      display: flex;
+      gap: var(--space-sm);
+    }
+
+    .peer-comparison {
+      background: var(--gray-50);
+      padding: var(--space-lg);
+      border-radius: var(--radius-md);
+      margin-top: var(--space-lg);
+    }
+
+    .peer-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md) 0;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .peer-item:last-child {
+      border-bottom: none;
+    }
+
+    .peer-label {
+      flex: 1;
+      font-weight: 500;
+      color: var(--gray-700);
+    }
+
+    .peer-bar-container {
+      flex: 2;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .peer-bar {
+      flex: 1;
+      height: 24px;
+      background: var(--gray-200);
+      border-radius: var(--radius-sm);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .peer-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3B82F6 0%, #2563EB 100%);
+      transition: width 0.5s ease;
+    }
+
+    .peer-bar-fill.you {
+      background: linear-gradient(90deg, var(--aia-red) 0%, var(--aia-red-dark) 100%);
+    }
+
+    .peer-value {
+      font-weight: 700;
+      color: var(--gray-900);
+      min-width: 50px;
+      text-align: right;
+    }
+
+    .recommendation-box {
+      background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+      border: 2px solid #C7D2FE;
+      padding: var(--space-xl);
+      border-radius: var(--radius-lg);
+      margin-top: var(--space-xl);
+    }
+
+    .recommendation-box h3 {
+      color: #4338CA;
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .recommendation-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .recommendation-list li {
+      padding: var(--space-sm) 0;
+      color: var(--gray-700);
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      line-height: 1.6;
+    }
+
+    .recommendation-list li::before {
+      content: "💡";
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span style="font-size: 28px;">🧠</span>
+      <span>CompliSense AI</span>
+    </a>
+    <ul class="navbar-menu">
+      <li><a href="index.html">FHR Form</a></li>
+      <li><a href="products.html">Products</a></li>
+      <li><a href="portfolio.html">Portfolio</a></li>
+      <li class="nav-dropdown">
+        <span class="nav-dropdown-toggle">AI Tools ▾</span>
+        <div class="nav-dropdown-menu">
+          <a href="copilot.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">💬</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">AI Copilot</div>
+              <div class="nav-dropdown-item-desc">Chat compliance assistant</div>
+            </div>
+          </a>
+          <a href="analytics.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">📈</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Performance Analytics</div>
+              <div class="nav-dropdown-item-desc">Track metrics & anomalies</div>
+            </div>
+          </a>
+          <a href="graph.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">🕸️</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Compliance Graph</div>
+              <div class="nav-dropdown-item-desc">Visualize relationships</div>
+            </div>
+          </a>
+          <a href="documents.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">📄</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Document Intelligence</div>
+              <div class="nav-dropdown-item-desc">OCR & extraction</div>
+            </div>
+          </a>
+          <a href="regulatory.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">🔔</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Regulatory Updates</div>
+              <div class="nav-dropdown-item-desc">Latest MAS notices</div>
+            </div>
+          </a>
+        </div>
+      </li>
+      <li><a href="supervisor.html">Supervisor</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <span class="text-gray">Agent: <strong>MAHADEVAN KARTIK</strong></span>
+      
+    </div>
+  </nav>
+
+  <!-- Analytics Container -->
+  <div class="analytics-container">
+    <!-- Agent Header -->
+    <div class="agent-header">
+      <div class="agent-info">
+        <h2>Performance Analytics</h2>
+        <p>Behavioral insights and compliance trends for the last 30 days</p>
+      </div>
+      <div class="performance-score">
+        <div class="performance-score-value">87/100</div>
+        <div class="performance-score-label">Overall Performance Score</div>
+      </div>
+    </div>
+
+    <!-- Alert: Anomaly Detected -->
+    <div class="alert-card" style="border-left-color: #EF4444; background: #FEF2F2;">
+      <div class="alert-header">
+        <span class="alert-icon">⚠️</span>
+        <div>
+          <div class="alert-title" style="color: #991B1B;">Anomaly Detected: Premium Ratio Spike</div>
+          <div style="font-size: var(--font-size-xs); color: #7F1D1D; margin-top: 2px;">Detected 2 days ago</div>
+        </div>
+      </div>
+      <div class="alert-message">
+        Your average premium-to-income ratio has increased from <strong>22%</strong> to <strong>28%</strong> over the past week. This is above the MoneySense 15% guideline and significantly higher than your historical average. This pattern suggests potential over-recommendation of high-premium products.
+      </div>
+      <div class="alert-actions">
+        <button class="btn btn-primary btn-sm" onclick="alert('This would open a detailed analysis showing:\n\n• All proposals in the last week\n• Premium ratio distribution\n• Comparison with your 90-day average\n• Specific high-ratio cases flagged\n• Suggested corrective actions')">
+          View Details
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="alert('Anomaly dismissed. This will be marked as acknowledged in your compliance record.')">
+          Acknowledge
+        </button>
+      </div>
+    </div>
+
+    <!-- Key Metrics Grid -->
+    <div class="metrics-grid">
+      <!-- Metric 1: Approval Rate -->
+      <div class="metric-card-large warning">
+        <div class="metric-icon warning">📊</div>
+        <div class="metric-title">First-Submission Approval Rate</div>
+        <div class="metric-main-value">78%</div>
+        <div class="metric-comparison negative">
+          <span class="trend-indicator">↓ 11%</span>
+          <span>below team average (89%)</span>
+        </div>
+      </div>
+
+      <!-- Metric 2: Avg Premium Ratio -->
+      <div class="metric-card-large danger">
+        <div class="metric-icon danger">💰</div>
+        <div class="metric-title">Avg Premium-to-Income Ratio</div>
+        <div class="metric-main-value">17.2%</div>
+        <div class="metric-comparison negative">
+          <span class="trend-indicator">↑ 5.2%</span>
+          <span>from last month (12%)</span>
+        </div>
+      </div>
+
+      <!-- Metric 3: Compliance Score -->
+      <div class="metric-card-large good">
+        <div class="metric-icon good">✅</div>
+        <div class="metric-title">Avg Compliance Score</div>
+        <div class="metric-main-value">82/100</div>
+        <div class="metric-comparison positive">
+          <span class="trend-indicator">↑ 3pts</span>
+          <span>from last month (79)</span>
+        </div>
+      </div>
+
+      <!-- Metric 4: Processing Time -->
+      <div class="metric-card-large good">
+        <div class="metric-icon good">⚡</div>
+        <div class="metric-title">Avg Processing Time</div>
+        <div class="metric-main-value">18 min</div>
+        <div class="metric-comparison positive">
+          <span class="trend-indicator">↓ 22%</span>
+          <span>faster than team avg (23 min)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trend Chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3 class="chart-title">Proposal Submissions & Approval Rate Trend</h3>
+        <div class="time-filter">
+          <button class="time-filter-btn">7D</button>
+          <button class="time-filter-btn active">30D</button>
+          <button class="time-filter-btn">90D</button>
+        </div>
+      </div>
+
+      <div class="line-chart" id="lineChart">
+        <!-- Generated by JavaScript -->
+      </div>
+
+      <div style="display: flex; justify-content: center; gap: var(--space-xl); margin-top: var(--space-xl); font-size: var(--font-size-sm);">
+        <div style="display: flex; align-items: center; gap: var(--space-sm);">
+          <div style="width: 16px; height: 16px; background: var(--aia-red); border-radius: 2px;"></div>
+          <span>Submissions per week</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: var(--space-sm);">
+          <div style="width: 16px; height: 16px; background: #10B981; border-radius: 2px;"></div>
+          <span>Approval rate %</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Peer Comparison -->
+    <div class="chart-card">
+      <h3 class="chart-title">Team Benchmark Comparison</h3>
+      <p style="color: var(--gray-600); margin-bottom: var(--space-xl); font-size: var(--font-size-sm);">
+        See how your performance compares to your peers in the Southeast Region team
+      </p>
+
+      <div class="peer-comparison">
+        <div class="peer-item">
+          <div class="peer-label">Approval Rate</div>
+          <div class="peer-bar-container">
+            <div class="peer-bar">
+              <div class="peer-bar-fill you" style="width: 78%;"></div>
+            </div>
+            <div class="peer-value">78%</div>
+          </div>
+        </div>
+
+        <div class="peer-item">
+          <div class="peer-label">Team Average</div>
+          <div class="peer-bar-container">
+            <div class="peer-bar">
+              <div class="peer-bar-fill" style="width: 89%;"></div>
+            </div>
+            <div class="peer-value">89%</div>
+          </div>
+        </div>
+
+        <div class="peer-item">
+          <div class="peer-label">Top Performer</div>
+          <div class="peer-bar-container">
+            <div class="peer-bar">
+              <div class="peer-bar-fill" style="width: 96%;"></div>
+            </div>
+            <div class="peer-value">96%</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: var(--space-lg); padding: var(--space-md); background: var(--info-bg); border-radius: var(--radius-md);">
+        <strong style="color: var(--info-text);">📈 Gap Analysis:</strong>
+        <span style="color: var(--gray-700); font-size: var(--font-size-sm);"> You need to improve by 11 percentage points to reach team average. Focus on documentation quality and premium affordability validation.</span>
+      </div>
+    </div>
+
+    <!-- Common Issues -->
+    <div class="chart-card">
+      <h3 class="chart-title">Recurring Compliance Issues (Last 30 Days)</h3>
+
+      <table style="width: 100%; border-collapse: collapse; margin-top: var(--space-lg);">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--gray-200);">
+            <th style="text-align: left; padding: var(--space-md); color: var(--gray-700); font-weight: 600;">Issue Type</th>
+            <th style="text-align: center; padding: var(--space-md); color: var(--gray-700); font-weight: 600;">Frequency</th>
+            <th style="text-align: center; padding: var(--space-md); color: var(--gray-700); font-weight: 600;">Impact on Score</th>
+            <th style="text-align: left; padding: var(--space-md); color: var(--gray-700); font-weight: 600;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--gray-200);">
+            <td style="padding: var(--space-md);">
+              <strong>Premium ratio > 15%</strong>
+              <div style="font-size: var(--font-size-xs); color: var(--gray-600);">MoneySense affordability breach</div>
+            </td>
+            <td style="text-align: center; padding: var(--space-md);">
+              <span class="badge badge-error">12 cases</span>
+            </td>
+            <td style="text-align: center; padding: var(--space-md); color: var(--error-text); font-weight: 700;">-18 pts</td>
+            <td style="padding: var(--space-md);">
+              <button class="btn btn-ghost btn-sm" onclick="alert('Training Module: Premium Affordability Calculation\n\n• Understanding MoneySense 15% guideline\n• How to calculate disposable income\n• Using CompliSense AI affordability calculator\n• Case studies of rejected proposals')">Review Training</button>
+            </td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--gray-200);">
+            <td style="padding: var(--space-md);">
+              <strong>Incomplete justifications</strong>
+              <div style="font-size: var(--font-size-xs); color: var(--gray-600);">Missing risk appetite details</div>
+            </td>
+            <td style="text-align: center; padding: var(--space-md);">
+              <span class="badge badge-warning">8 cases</span>
+            </td>
+            <td style="text-align: center; padding: var(--space-md); color: var(--warning-text); font-weight: 700;">-12 pts</td>
+            <td style="padding: var(--space-md);">
+              <button class="btn btn-ghost btn-sm" onclick="alert('Training Module: Effective Advisory Documentation\n\n• Required elements of justification\n• Using CompliSense AI template suggestions\n• Examples of high-quality justifications\n• Common mistakes to avoid')">Review Training</button>
+            </td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--gray-200);">
+            <td style="padding: var(--space-md);">
+              <strong>Insufficient emergency fund</strong>
+              <div style="font-size: var(--font-size-xs); color: var(--gray-600);">Client below 3-month minimum</div>
+            </td>
+            <td style="text-align: center; padding: var(--space-md);">
+              <span class="badge badge-warning">6 cases</span>
+            </td>
+            <td style="text-align: center; padding: var(--space-md); color: var(--warning-text); font-weight: 700;">-9 pts</td>
+            <td style="padding: var(--space-md);">
+              <button class="btn btn-ghost btn-sm">Review Training</button>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: var(--space-md);">
+              <strong>CI coverage below 4x</strong>
+              <div style="font-size: var(--font-size-xs); color: var(--gray-600);">MoneySense CI guideline</div>
+            </td>
+            <td style="text-align: center; padding: var(--space-md);">
+              <span class="badge badge-info">4 cases</span>
+            </td>
+            <td style="text-align: center; padding: var(--space-md); color: var(--info-text); font-weight: 700;">-6 pts</td>
+            <td style="padding: var(--space-md);">
+              <button class="btn btn-ghost btn-sm">Review Training</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- AI Recommendations -->
+    <div class="recommendation-box">
+      <h3>🤖 AI-Powered Recommendations to Improve Your Performance</h3>
+      <ul class="recommendation-list">
+        <li>
+          <strong>Primary Focus: Premium Affordability</strong><br>
+          Your premium ratio violations (12 cases) are your biggest score detractor (-18 points). Before recommending products, always use CompliSense AI's affordability calculator to ensure premiums stay within 15% of client income. Consider lower-cost alternatives like term life instead of whole life for budget-constrained clients.
+        </li>
+        <li>
+          <strong>Improve Documentation Quality</strong><br>
+          Use the AI Copilot's template suggestions for justifications. Include: (1) Client's stated risk appetite on 1-10 scale, (2) Investment horizon in years, (3) How product aligns with life stage, (4) Acknowledgment of risks. This will resolve 8 incomplete justification issues.
+        </li>
+        <li>
+          <strong>Emergency Fund Validation</strong><br>
+          Before finalizing recommendations, check if client has 3-6 months emergency fund. If below 3 months, either recommend building the fund first OR reduce premium to allow concurrent fund building. Use the smart suggestion: "Client should allocate $X/month to emergency fund for 6 months before increasing premiums."
+        </li>
+        <li>
+          <strong>Benchmark Against Top Performers</strong><br>
+          Schedule a shadowing session with Mary Lim (96% approval rate). Analyze her proposal patterns to understand how she achieves consistently high scores. Focus on her justification style and premium calculation methods.
+        </li>
+      </ul>
+
+      <div style="margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid #C7D2FE;">
+        <strong style="color: #4338CA;">Projected Impact:</strong>
+        <span style="color: var(--gray-700);"> If you address these 4 areas, CompliSense AI predicts your approval rate will increase from 78% to approximately <strong style="color: #10B981;">91%</strong> within 30 days, surpassing team average.</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Generate line chart
+    const chartData = [
+      { week: 'Week 1', submissions: 12, approvalRate: 85 },
+      { week: 'Week 2', submissions: 15, approvalRate: 82 },
+      { week: 'Week 3', submissions: 14, approvalRate: 75 },
+      { week: 'Week 4', submissions: 18, approvalRate: 78 }
+    ];
+
+    const lineChart = document.getElementById('lineChart');
+    const maxSubmissions = Math.max(...chartData.map(d => d.submissions));
+
+    chartData.forEach(data => {
+      const bar = document.createElement('div');
+      bar.className = 'line-bar';
+      const height = (data.submissions / maxSubmissions) * 100;
+      bar.style.height = height + '%';
+
+      const label = document.createElement('div');
+      label.className = 'line-bar-label';
+      label.textContent = data.week;
+
+      bar.appendChild(label);
+      lineChart.appendChild(bar);
+    });
+
+    // Animate bars on load
+    window.addEventListener('load', () => {
+      const bars = document.querySelectorAll('.line-bar');
+      bars.forEach((bar, index) => {
+        const height = bar.style.height;
+        bar.style.height = '0%';
+        setTimeout(() => {
+          bar.style.height = height;
+        }, 100 + (index * 100));
+      });
+
+      // Animate peer bars
+      const peerBars = document.querySelectorAll('.peer-bar-fill');
+      peerBars.forEach((bar, index) => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => {
+          bar.style.width = width;
+        }, 500 + (index * 200));
+      });
+    });
+  </script>
+  <!-- Floating Chat Widget -->
+  <div class="chat-widget">
+    <button class="chat-widget-button" onclick="window.location.href='copilot.html'" title="Ask AI Copilot">
+      💬
+    </button>
+    <div class="chat-widget-tooltip">Ask AI Copilot</div>
+  </div>
+
+</body>
+</html>

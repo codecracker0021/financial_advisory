@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Client Suitability Report - CompliSense AI</title>
+
+  <link rel="stylesheet" href="styles/aia-theme.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <style>
+    .report-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: var(--space-xl);
+      background: white;
+    }
+
+    .report-header {
+      text-align: center;
+      padding: var(--space-xl) 0;
+      border-bottom: 3px solid var(--aia-red);
+      margin-bottom: var(--space-xl);
+    }
+
+    .report-logo {
+      font-size: 48px;
+      margin-bottom: var(--space-md);
+    }
+
+    .report-title {
+      font-size: var(--font-size-3xl);
+      color: var(--aia-red);
+      margin-bottom: var(--space-sm);
+    }
+
+    .report-subtitle {
+      color: var(--gray-600);
+      font-size: var(--font-size-lg);
+    }
+
+    .report-section {
+      margin-bottom: var(--space-2xl);
+      page-break-inside: avoid;
+    }
+
+    .section-number {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--aia-red);
+      color: white;
+      text-align: center;
+      line-height: 40px;
+      font-weight: 700;
+      margin-right: var(--space-md);
+      flex-shrink: 0;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      margin-bottom: var(--space-lg);
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      color: var(--gray-900);
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-lg);
+      margin-bottom: var(--space-lg);
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      padding: var(--space-md);
+      background: var(--gray-50);
+      border-radius: var(--radius-md);
+    }
+
+    .info-label {
+      color: var(--gray-600);
+      font-weight: 500;
+    }
+
+    .info-value {
+      color: var(--gray-900);
+      font-weight: 700;
+    }
+
+    .coverage-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: var(--space-lg) 0;
+    }
+
+    .coverage-table th,
+    .coverage-table td {
+      padding: var(--space-md);
+      text-align: left;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .coverage-table th {
+      background: var(--gray-100);
+      font-weight: 600;
+      color: var(--gray-700);
+    }
+
+    .coverage-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+    }
+
+    .status-badge.meets {
+      background: var(--success-bg);
+      color: var(--success-text);
+    }
+
+    .status-badge.below {
+      background: var(--warning-bg);
+      color: var(--warning-text);
+    }
+
+    .status-badge.exceeds {
+      background: var(--info-bg);
+      color: var(--info-text);
+    }
+
+    .highlight-box {
+      background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+      border-left: 4px solid #6366F1;
+      padding: var(--space-lg);
+      border-radius: var(--radius-md);
+      margin: var(--space-lg) 0;
+    }
+
+    .highlight-box h3 {
+      color: #4338CA;
+      margin-bottom: var(--space-md);
+    }
+
+    .chart-container {
+      background: var(--gray-50);
+      padding: var(--space-xl);
+      border-radius: var(--radius-lg);
+      margin: var(--space-lg) 0;
+    }
+
+    .bar-chart {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .bar-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .bar-label {
+      width: 180px;
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      color: var(--gray-700);
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 32px;
+      background: white;
+      border-radius: var(--radius-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--aia-red) 0%, #E8395F 100%);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 8px;
+      color: white;
+      font-weight: 700;
+      font-size: var(--font-size-sm);
+      transition: width 1s ease;
+    }
+
+    .moneysense-reference {
+      background: var(--success-bg);
+      border: 2px solid var(--success-border);
+      padding: var(--space-lg);
+      border-radius: var(--radius-lg);
+      margin: var(--space-xl) 0;
+    }
+
+    .moneysense-reference h3 {
+      color: var(--success-text);
+      margin-bottom: var(--space-md);
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0;
+    }
+
+    .checklist li {
+      padding: var(--space-sm) 0;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: var(--font-size-base);
+      color: var(--gray-700);
+    }
+
+    .checklist li::before {
+      content: "✓";
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #10B981;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .report-footer {
+      margin-top: var(--space-2xl);
+      padding-top: var(--space-xl);
+      border-top: 2px solid var(--gray-200);
+      text-align: center;
+      color: var(--gray-600);
+      font-size: var(--font-size-sm);
+    }
+
+    .confidence-score {
+      text-align: center;
+      padding: var(--space-xl);
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      color: white;
+      border-radius: var(--radius-lg);
+      margin: var(--space-xl) 0;
+    }
+
+    .confidence-score-value {
+      font-size: 64px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .confidence-score-label {
+      font-size: var(--font-size-lg);
+      margin-top: var(--space-md);
+      opacity: 0.9;
+    }
+
+    .print-buttons {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      z-index: 100;
+    }
+
+    @media print {
+      .navbar,
+      .print-buttons {
+        display: none;
+      }
+
+      .report-container {
+        padding: 0;
+      }
+
+      .report-section {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body style="background: var(--gray-100);">
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span style="font-size: 28px;">🧠</span>
+      <span>CompliSense AI</span>
+    </a>
+    <ul class="navbar-menu">
+      <li><a href="index.html">FHR Form</a></li>
+      <li><a href="products.html">Products</a></li>
+      <li><a href="portfolio.html">Portfolio</a></li>
+      <li class="nav-dropdown">
+        <span class="nav-dropdown-toggle">AI Tools ▾</span>
+        <div class="nav-dropdown-menu">
+          <a href="copilot.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">💬</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">AI Copilot</div>
+              <div class="nav-dropdown-item-desc">Chat compliance assistant</div>
+            </div>
+          </a>
+          <a href="analytics.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">📈</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Performance Analytics</div>
+              <div class="nav-dropdown-item-desc">Track metrics & anomalies</div>
+            </div>
+          </a>
+          <a href="graph.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">🕸️</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Compliance Graph</div>
+              <div class="nav-dropdown-item-desc">Visualize relationships</div>
+            </div>
+          </a>
+          <a href="documents.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">📄</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Document Intelligence</div>
+              <div class="nav-dropdown-item-desc">OCR & extraction</div>
+            </div>
+          </a>
+          <a href="regulatory.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">🔔</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Regulatory Updates</div>
+              <div class="nav-dropdown-item-desc">Latest MAS notices</div>
+            </div>
+          </a>
+        </div>
+      </li>
+      <li><a href="supervisor.html">Supervisor</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <span class="text-gray">Agent: <strong>MAHADEVAN KARTIK</strong></span>
+      
+    </div>
+  </nav>
+
+  <!-- Print Buttons -->
+  <div class="print-buttons">
+    <button class="btn btn-primary" onclick="window.print()">
+      🖨️ Print Report
+    </button>
+    <button class="btn btn-secondary" onclick="downloadPDF()">
+      📄 Download PDF
+    </button>
+    <button class="btn btn-ghost" onclick="window.location.href='index.html'">
+      ← Back to Form
+    </button>
+  </div>
+
+  <!-- Report Container -->
+  <div class="report-container">
+    <!-- Header -->
+    <div class="report-header">
+      <div class="report-logo">🛡️</div>
+      <h1 class="report-title">Insurance Suitability Report</h1>
+      <div class="report-subtitle">Personalized Recommendation Analysis</div>
+      <div style="margin-top: var(--space-lg); color: var(--gray-500); font-size: var(--font-size-sm);">
+        Generated on: 15 December 2025 | Report ID: SR-2025-1234
+      </div>
+    </div>
+
+    <!-- Confidence Score -->
+    <div class="confidence-score">
+      <div class="confidence-score-value">94%</div>
+      <div class="confidence-score-label">Suitability Match Score</div>
+      <div style="margin-top: var(--space-md); font-size: var(--font-size-sm); opacity: 0.9;">
+        This recommendation matches your financial profile based on analysis of 10,000+ similar successful cases
+      </div>
+    </div>
+
+    <!-- Section 1: Client Profile -->
+    <div class="report-section">
+      <div class="section-heading">
+        <div class="section-number">1</div>
+        <h2>Your Financial Profile</h2>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Name</span>
+          <span class="info-value">Tan Wei Ming</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Age</span>
+          <span class="info-value">35 years</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Monthly Income</span>
+          <span class="info-value">$4,500</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Annual Income</span>
+          <span class="info-value">$54,000</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Family Size</span>
+          <span class="info-value">4 (Self, Spouse, 2 Children)</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Life Stage</span>
+          <span class="info-value">Starting a Family</span>
+        </div>
+      </div>
+
+      <p style="color: var(--gray-700); line-height: 1.8;">
+        You are in the <strong>"Starting a Family"</strong> life stage. At this stage, your priority is to ensure your family's financial security through comprehensive protection coverage. Your financial profile indicates moderate income with growing family responsibilities, requiring a balance between protection and affordability.
+      </p>
+    </div>
+
+    <!-- Section 2: Recommended Solution -->
+    <div class="report-section">
+      <div class="section-heading">
+        <div class="section-number">2</div>
+        <h2>Recommended Insurance Solution</h2>
+      </div>
+
+      <div class="highlight-box">
+        <h3>AIA Family Protect Plus</h3>
+        <p style="margin-bottom: var(--space-md); color: var(--gray-700);">
+          <strong>Type:</strong> Term Life Insurance with Critical Illness Rider<br>
+          <strong>Monthly Premium:</strong> $650<br>
+          <strong>Policy Term:</strong> 20 years (until age 55)
+        </p>
+        <p style="color: var(--gray-700); line-height: 1.8; margin: 0;">
+          This comprehensive protection plan provides death and total permanent disability coverage of <strong>$500,000</strong>, plus critical illness coverage of <strong>$220,000</strong>. It is specifically designed for families with young children, offering robust protection during your peak earning years.
+        </p>
+      </div>
+
+      <h3 style="margin-top: var(--space-xl); margin-bottom: var(--space-md);">Why This Recommendation?</h3>
+      <ul style="color: var(--gray-700); line-height: 1.8; padding-left: 20px;">
+        <li style="margin-bottom: var(--space-sm);">
+          <strong>Life Stage Alignment:</strong> Perfectly suited for families with young children (ages 3 and 5), providing income replacement and family protection during critical child-raising years.
+        </li>
+        <li style="margin-bottom: var(--space-sm);">
+          <strong>Comprehensive Coverage:</strong> Combines death/TPD and critical illness protection in one affordable package, addressing both mortality and morbidity risks.
+        </li>
+        <li style="margin-bottom: var(--space-sm);">
+          <strong>Affordability:</strong> Premium of $650/month represents 14.4% of your income, comfortably within the recommended 15% guideline.
+        </li>
+        <li style="margin-bottom: var(--space-sm);">
+          <strong>MoneySense Compliant:</strong> Meets all Singapore Government financial planning guidelines for protection adequacy.
+        </li>
+      </ul>
+    </div>
+
+    <!-- Section 3: Coverage Analysis -->
+    <div class="report-section">
+      <div class="section-heading">
+        <div class="section-number">3</div>
+        <h2>Protection Coverage Analysis</h2>
+      </div>
+
+      <table class="coverage-table">
+        <thead>
+          <tr>
+            <th>Coverage Type</th>
+            <th>Your Coverage</th>
+            <th>MoneySense Guideline</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Death/TPD Protection</strong></td>
+            <td>$500,000 (9.3x annual income)</td>
+            <td>9x annual income ($486,000)</td>
+            <td><span class="status-badge meets">✓ Meets</span></td>
+          </tr>
+          <tr>
+            <td><strong>Critical Illness</strong></td>
+            <td>$220,000 (4.1x annual income)</td>
+            <td>4x annual income ($216,000)</td>
+            <td><span class="status-badge meets">✓ Meets</span></td>
+          </tr>
+          <tr>
+            <td><strong>Monthly Premium</strong></td>
+            <td>$650 (14.4% of income)</td>
+            <td>Maximum 15% of income</td>
+            <td><span class="status-badge meets">✓ Within Limit</span></td>
+          </tr>
+          <tr>
+            <td><strong>Emergency Fund</strong></td>
+            <td>$8,000 (2.5 months expenses)</td>
+            <td>3-6 months expenses</td>
+            <td><span class="status-badge below">⚠ Build to $9,600+</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="chart-container">
+        <h4 style="margin-bottom: var(--space-lg); color: var(--gray-700);">Coverage Adequacy Visualization</h4>
+        <div class="bar-chart">
+          <div class="bar-item">
+            <div class="bar-label">Death Coverage</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width: 103%;">103%</div>
+            </div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-label">Critical Illness</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width: 102%;">102%</div>
+            </div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-label">Premium Affordability</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width: 96%;">96%</div>
+            </div>
+          </div>
+        </div>
+        <p style="margin-top: var(--space-md); font-size: var(--font-size-sm); color: var(--gray-600); text-align: center;">
+          100% = Meets MoneySense guideline exactly | Values above 100% exceed recommendations
+        </p>
+      </div>
+    </div>
+
+    <!-- Section 4: Affordability Breakdown -->
+    <div class="report-section">
+      <div class="section-heading">
+        <div class="section-number">4</div>
+        <h2>Affordability Breakdown</h2>
+      </div>
+
+      <table class="coverage-table">
+        <tbody>
+          <tr>
+            <td style="width: 60%;"><strong>Monthly Income</strong></td>
+            <td style="text-align: right; font-weight: 600;">$4,500</td>
+          </tr>
+          <tr>
+            <td>Insurance Premium (14.4%)</td>
+            <td style="text-align: right; color: var(--aia-red); font-weight: 700;">- $650</td>
+          </tr>
+          <tr>
+            <td>Living Expenses</td>
+            <td style="text-align: right;">- $3,200</td>
+          </tr>
+          <tr>
+            <td>Retirement Savings (10% recommended)</td>
+            <td style="text-align: right;">- $450</td>
+          </tr>
+          <tr style="background: var(--gray-50);">
+            <td><strong>Remaining Discretionary Income</strong></td>
+            <td style="text-align: right; font-weight: 700; color: #10B981;">$200</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="highlight-box" style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); border-left-color: #F59E0B;">
+        <h3 style="color: #92400E;">💡 Financial Planning Advice</h3>
+        <p style="color: #78350F; margin: 0; line-height: 1.8;">
+          Your current emergency fund ($8,000) covers 2.5 months of expenses. We recommend building this to at least $9,600 (3 months) for basic financial security, ideally $19,200 (6 months) for optimal protection. Consider allocating your $200 discretionary income towards emergency fund building over the next 6-12 months.
+        </p>
+      </div>
+    </div>
+
+    <!-- Section 5: MoneySense Compliance -->
+    <div class="report-section">
+      <div class="section-heading">
+        <div class="section-number">5</div>
+        <h2>MoneySense Guidelines Compliance</h2>
+      </div>
+
+      <div class="moneysense-reference">
+        <h3>✅ This recommendation aligns with Singapore Government's MoneySense financial planning standards</h3>
+        <ul class="checklist">
+          <li>Insurance spending does not exceed 15% of monthly income</li>
+          <li>Death/TPD coverage meets the 9x annual income guideline</li>
+          <li>Critical illness coverage meets the 4x annual income guideline</li>
+          <li>Product type is age-appropriate for your life stage</li>
+          <li>Premium is sustainable based on your income and expenses</li>
+          <li>Coverage addresses family protection needs (spouse + 2 children)</li>
+        </ul>
+      </div>
+
+      <p style="color: var(--gray-600); font-size: var(--font-size-sm); margin-top: var(--space-lg); line-height: 1.8;">
+        <strong>About MoneySense:</strong> MoneySense is Singapore's national financial education programme, developed by the Ministry of Manpower (MOM) and supported by the Monetary Authority of Singapore (MAS). These guidelines represent best practices for financial planning tailored to Singapore residents.
+      </p>
+
+      <p style="color: var(--gray-600); font-size: var(--font-size-sm); margin-top: var(--space-md);">
+        Learn more: <a href="https://www.moneysense.gov.sg/planning-your-finances-well/" target="_blank" style="color: var(--aia-red);">https://www.moneysense.gov.sg/planning-your-finances-well/</a>
+      </p>
+    </div>
+
+    <!-- Section 6: Next Steps -->
+    <div class="report-section">
+      <div class="section-heading">
+        <div class="section-number">6</div>
+        <h2>Next Steps</h2>
+      </div>
+
+      <ol style="color: var(--gray-700); line-height: 2; padding-left: 20px;">
+        <li><strong>Review this report carefully</strong> and ask your financial advisor any questions about the recommendation.</li>
+        <li><strong>Understand the policy terms</strong>, including coverage details, exclusions, and premium payment schedule.</li>
+        <li><strong>Complete the application</strong> with accurate health and financial information.</li>
+        <li><strong>Undergo medical underwriting</strong> (if required) to finalize coverage amounts.</li>
+        <li><strong>Receive your policy documents</strong> within 7-14 days of approval.</li>
+        <li><strong>Schedule an annual review</strong> to ensure your coverage remains appropriate as your life circumstances change.</li>
+      </ol>
+
+      <div style="margin-top: var(--space-xl); padding: var(--space-lg); background: var(--gray-50); border-radius: var(--radius-md);">
+        <h4 style="margin-bottom: var(--space-md);">Questions or Concerns?</h4>
+        <p style="color: var(--gray-700); margin: 0;">
+          Your AIA financial advisor <strong>Mahadevan Kartik</strong> is available to discuss this recommendation in detail. Contact via email or schedule a follow-up consultation to address any questions.
+        </p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="report-footer">
+      <div style="margin-bottom: var(--space-md);">
+        <strong>Generated by CompliSense AI</strong> - Intelligent Compliance & Suitability Analysis System
+      </div>
+      <div style="margin-bottom: var(--space-sm);">
+        This report was generated using CompliSense AI's advanced suitability matching algorithm, validated against MoneySense guidelines and AIA's compliance standards.
+      </div>
+      <div style="font-size: var(--font-size-xs); color: var(--gray-500);">
+        Report ID: SR-2025-1234 | Generated: 15-Dec-2025 14:32 SGT | Agent: Mahadevan Kartik (ID: AIA-SG-0012)
+      </div>
+      <div style="margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--gray-300);">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 60'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='24' fill='%23C5193B' font-weight='bold'%3EAIA Singapore%3C/text%3E%3C/svg%3E" alt="AIA Singapore" style="height: 40px; opacity: 0.6;">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function downloadPDF() {
+      alert('📄 PDF Download\n\nIn a full implementation, this would generate a PDF using:\n\n• html2pdf.js library\n• Server-side PDF generation (wkhtmltopdf, Puppeteer)\n• Cloud service (DocRaptor, PDFShift)\n\nThe PDF would include:\n✓ All sections from this report\n✓ Client signature fields\n✓ AIA branding and watermarks\n✓ QR code for verification\n✓ Embedded compliance audit trail');
+    }
+
+    // Animate charts on load
+    window.addEventListener('load', () => {
+      const bars = document.querySelectorAll('.bar-fill');
+      bars.forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => {
+          bar.style.width = width;
+        }, 100);
+      });
+    });
+  </script>
+  <!-- Floating Chat Widget -->
+  <div class="chat-widget">
+    <button class="chat-widget-button" onclick="window.location.href='copilot.html'" title="Ask AI Copilot">
+      💬
+    </button>
+    <div class="chat-widget-tooltip">Ask AI Copilot</div>
+  </div>
+
+</body>
+</html>

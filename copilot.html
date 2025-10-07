@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>CompliSense AI - Copilot Chat</title>
+
+  <link rel="stylesheet" href="styles/aia-theme.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <style>
+    .chat-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--space-xl);
+      height: calc(100vh - 80px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header {
+      background: linear-gradient(135deg, var(--aia-red) 0%, var(--aia-red-dark) 100%);
+      color: white;
+      padding: var(--space-xl);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-lg);
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--space-lg);
+      background: white;
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-lg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .message {
+      display: flex;
+      gap: var(--space-md);
+      margin-bottom: var(--space-xl);
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .message.user .message-avatar {
+      background-color: var(--gray-200);
+    }
+
+    .message.ai .message-avatar {
+      background: linear-gradient(135deg, var(--aia-red) 0%, var(--aia-red-dark) 100%);
+    }
+
+    .message-content {
+      flex: 1;
+      background-color: var(--gray-50);
+      padding: var(--space-md);
+      border-radius: var(--radius-md);
+      line-height: 1.6;
+    }
+
+    .message.ai .message-content {
+      background-color: var(--bg-card);
+      border: 1px solid var(--gray-200);
+    }
+
+    .message-meta {
+      font-size: var(--font-size-xs);
+      color: var(--gray-500);
+      margin-bottom: var(--space-sm);
+      font-weight: 600;
+    }
+
+    .message-text {
+      color: var(--gray-800);
+    }
+
+    .citation {
+      background-color: var(--info-bg);
+      border-left: 3px solid var(--info-border);
+      padding: var(--space-sm) var(--space-md);
+      margin-top: var(--space-md);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      color: var(--info-text);
+    }
+
+    .quick-suggestions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-sm);
+      margin-top: var(--space-md);
+    }
+
+    .suggestion-chip {
+      background-color: white;
+      border: 1px solid var(--gray-300);
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: var(--font-size-sm);
+      text-align: center;
+    }
+
+    .suggestion-chip:hover {
+      border-color: var(--aia-red);
+      background-color: var(--gray-50);
+    }
+
+    .chat-input-container {
+      background: white;
+      padding: var(--space-lg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      display: flex;
+      gap: var(--space-md);
+    }
+
+    .chat-input {
+      flex: 1;
+      border: 2px solid var(--gray-300);
+      padding: 12px 16px;
+      border-radius: var(--radius-lg);
+      font-size: var(--font-size-base);
+      transition: all 0.2s ease;
+    }
+
+    .chat-input:focus {
+      outline: none;
+      border-color: var(--aia-red);
+      box-shadow: 0 0 0 3px rgba(197, 25, 59, 0.1);
+    }
+
+    .send-btn {
+      background: var(--aia-red);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .send-btn:hover {
+      background: var(--aia-red-dark);
+    }
+
+    .send-btn:disabled {
+      background: var(--gray-300);
+      cursor: not-allowed;
+    }
+
+    .thinking-indicator {
+      display: flex;
+      gap: 4px;
+      padding: var(--space-md);
+    }
+
+    .thinking-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--aia-red);
+      animation: pulse 1.4s infinite ease-in-out;
+    }
+
+    .thinking-dot:nth-child(1) { animation-delay: -0.32s; }
+    .thinking-dot:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes pulse {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span style="font-size: 28px;">🧠</span>
+      <span>CompliSense AI</span>
+    </a>
+    <ul class="navbar-menu">
+      <li><a href="index.html">FHR Form</a></li>
+      <li><a href="products.html">Products</a></li>
+      <li><a href="portfolio.html">Portfolio</a></li>
+      <li class="nav-dropdown">
+        <span class="nav-dropdown-toggle">
+          AI Tools ▾
+        </span>
+        <div class="nav-dropdown-menu">
+          <a href="copilot.html" class="nav-dropdown-item active">
+            <span class="nav-dropdown-item-icon">💬</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">AI Copilot</div>
+              <div class="nav-dropdown-item-desc">Chat compliance assistant</div>
+            </div>
+          </a>
+          <a href="analytics.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">📈</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Performance Analytics</div>
+              <div class="nav-dropdown-item-desc">Track metrics & anomalies</div>
+            </div>
+          </a>
+          <a href="graph.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">🕸️</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Compliance Graph</div>
+              <div class="nav-dropdown-item-desc">Visualize relationships</div>
+            </div>
+          </a>
+          <a href="documents.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">📄</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Document Intelligence</div>
+              <div class="nav-dropdown-item-desc">OCR & extraction</div>
+            </div>
+          </a>
+          <a href="regulatory.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">🔔</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Regulatory Updates</div>
+              <div class="nav-dropdown-item-desc">Latest MAS notices</div>
+            </div>
+          </a>
+        </div>
+      </li>
+      <li><a href="supervisor.html">Supervisor</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <span class="text-gray">Agent: <strong>MAHADEVAN KARTIK</strong></span>
+      
+    </div>
+  </nav>
+
+  <!-- Chat Container -->
+  <div class="chat-container">
+    <!-- Chat Header -->
+    <div class="chat-header">
+      <div style="display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-sm);">
+        <span style="font-size: 36px;">🤖</span>
+        <div>
+          <h2 style="margin: 0;">AI Compliance Copilot</h2>
+          <p style="margin: 0; opacity: 0.9; font-size: var(--font-size-sm);">Ask me anything about MoneySense guidelines, AIA policies, or compliance rules</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Messages -->
+    <div class="chat-messages" id="chatMessages">
+      <!-- Welcome Message -->
+      <div class="message ai">
+        <div class="message-avatar">🤖</div>
+        <div class="message-content">
+          <div class="message-meta">CompliSense AI • Just now</div>
+          <div class="message-text">
+            Hello! I'm your AI Compliance Assistant. I can help you with:
+            <ul style="margin-top: var(--space-sm); padding-left: 20px;">
+              <li>MoneySense guidelines and financial planning rules</li>
+              <li>AIA product suitability and compliance checks</li>
+              <li>Client profile analysis and recommendations</li>
+              <li>Regulatory requirements and disclosure rules</li>
+            </ul>
+            <strong>Try asking me a question, or select one of the suggestions below:</strong>
+          </div>
+          <div class="quick-suggestions">
+            <button class="suggestion-chip" onclick="askQuestion('Can I recommend ILP to a 68-year-old?')">
+              🧓 ILP for seniors?
+            </button>
+            <button class="suggestion-chip" onclick="askQuestion('What is the max affordable premium for $4,500/month income?')">
+              💰 Max premium calculation
+            </button>
+            <button class="suggestion-chip" onclick="askQuestion('How much emergency fund should my client have?')">
+              🏦 Emergency fund guidance
+            </button>
+            <button class="suggestion-chip" onclick="askQuestion('What critical illness coverage do I need for $60,000 annual income?')">
+              🏥 CI coverage calculation
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Input -->
+    <div class="chat-input-container">
+      <input type="text" class="chat-input" id="chatInput" placeholder="Ask about compliance, MoneySense guidelines, or product suitability..." />
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    // Predefined AI responses
+    const aiResponses = {
+      'ilp': {
+        question: 'Can I recommend ILP to a 68-year-old?',
+        answer: `⚠️ <strong>Not recommended.</strong> According to MoneySense guidelines and AIA's advisory standards, Investment-Linked Policies (ILP) are generally not suitable for clients above 65 years old.
+
+        <div style="margin-top: 12px;"><strong>Reasons:</strong></div>
+        <ul style="margin-top: 8px; padding-left: 20px; line-height: 1.8;">
+          <li>ILPs carry investment risk with potential capital loss</li>
+          <li>Seniors typically have lower risk tolerance and shorter investment horizons</li>
+          <li>MAS guidelines recommend lower-risk products for elderly clients</li>
+          <li>Focus should be on capital preservation, not growth</li>
+        </ul>
+
+        <div style="margin-top: 12px;"><strong>Recommended alternatives:</strong></div>
+        <ul style="margin-top: 8px; padding-left: 20px; line-height: 1.8;">
+          <li>RetireSecure Plus (guaranteed income annuity)</li>
+          <li>MediShield Life supplementation for healthcare costs</li>
+          <li>Whole life plans with reduced coverage amounts</li>
+        </ul>`,
+        citation: 'MoneySense Life Stage Guide: Golden Years (65+) | AIA Advisory Manual Section 7.4'
+      },
+      'premium': {
+        question: 'What is the max affordable premium for $4,500/month income?',
+        answer: `💰 For a client earning <strong>$4,500/month</strong>, the maximum recommended premium is:
+
+        <div style="font-size: 24px; font-weight: 700; color: var(--aia-red); margin: 12px 0;">$675/month (15% of income)</div>
+
+        <div style="margin-top: 12px;"><strong>MoneySense Guideline:</strong> Spend at most 15% of monthly income on insurance premiums.</div>
+
+        <div style="margin-top: 12px;"><strong>Calculation:</strong></div>
+        <ul style="margin-top: 8px; padding-left: 20px; line-height: 1.8;">
+          <li>Monthly Income: $4,500</li>
+          <li>Maximum Premium: $4,500 × 15% = $675</li>
+          <li>This leaves $3,825 for other expenses and savings</li>
+        </ul>
+
+        <div style="margin-top: 12px;"><strong>Important considerations:</strong></div>
+        <ul style="margin-top: 8px; padding-left: 20px; line-height: 1.8;">
+          <li>Ensure client has 3-6 months emergency fund first</li>
+          <li>Allocate at least 10% ($450/month) to retirement savings</li>
+          <li>If client has dependents, prioritize term life over expensive whole life plans</li>
+          <li>Consider extending policy term to reduce monthly premiums</li>
+        </ul>`,
+        citation: 'MoneySense Financial Planning Guide | Basic Financial Planning Rules'
+      },
+      'emergency': {
+        question: 'How much emergency fund should my client have?',
+        answer: `🏦 <strong>MoneySense recommends: 3-6 months of monthly expenses</strong>
+
+        <div style="margin-top: 12px;"><strong>Calculation example:</strong></div>
+        <div style="margin-top: 8px;">If client's monthly expenses = $3,200</div>
+        <ul style="margin-top: 8px; padding-left: 20px; line-height: 1.8;">
+          <li>Minimum: $9,600 (3 months)</li>
+          <li>Recommended: $19,200 (6 months)</li>
+        </ul>
+
+        <div style="margin-top: 12px;"><strong>Why this matters:</strong></div>
+        <ul style="margin-top: 8px; padding-left: 20px; line-height: 1.8;">
+          <li>Protects against unexpected job loss or income reduction</li>
+          <li>Covers medical emergencies not covered by insurance</li>
+          <li>Prevents need to liquidate investments at unfavorable times</li>
+          <li>Reduces financial stress during life transitions</li>
+        </ul>
+
+        <div style="margin-top: 16px; padding: 12px; background: #FEF2F2; border-left: 3px solid #EF4444; border-radius: 4px;">
+          <strong>⚠️ Important for FHR:</strong><br/>
+          <strong>DO NOT recommend high premiums if client's emergency fund is inadequate</strong>
+        </div>
+
+        <div style="margin-top: 12px;">Clients should build emergency fund <strong>before</strong> committing to large insurance premiums. This is a critical compliance checkpoint.</div>`,
+        citation: 'MoneySense Financial Planning Guide | Emergency Fund Section'
+      },
+      'ci-coverage': {
+        question: 'What critical illness coverage do I need for $60,000 annual income?',
+        answer: `🏥 For <strong>$60,000 annual income</strong>, the recommended CI coverage is:
+
+        <div style="font-size: 24px; font-weight: 700; color: var(--aia-red); margin: 12px 0;">$240,000 (4x annual income)</div>
+
+        <div style="margin-top: 12px;"><strong>MoneySense Guideline:</strong> Critical Illness coverage should be 4x annual income.</div>
+
+        <div style="margin-top: 12px;"><strong>Why 4x annual income?</strong></div>
+        <ul style="margin-top: 8px; padding-left: 20px; line-height: 1.8;">
+          <li>Covers medical expenses not paid by MediShield/hospitalization insurance</li>
+          <li>Provides income replacement during treatment and recovery (typically 2-3 years)</li>
+          <li>Helps maintain family's standard of living during illness</li>
+          <li>Covers potential home modifications or specialized care</li>
+        </ul>
+
+        <div style="margin-top: 12px;"><strong>Product options to achieve this:</strong></div>
+        <ul style="margin-top: 8px; padding-left: 20px; line-height: 1.8;">
+          <li>Standalone CI plan: $240,000 coverage</li>
+          <li>Term life with CI rider: $200,000 base + $40,000 rider</li>
+          <li>Combination: Existing policies + top-up to reach $240,000</li>
+        </ul>
+
+        <div style="margin-top: 16px; padding: 12px; background: #FEF2F2; border-radius: 4px; border-left: 3px solid #F59E0B;">
+          <strong>Current client has $150,000 CI coverage:</strong><br/>
+          <span style="color: #EF4444;">✗ Only 2.5x annual income</span><br/>
+          <span style="color: #F59E0B;">⚠️ Shortfall: $90,000</span><br/>
+          <span style="color: #10B981;">💡 Recommend adding CI rider or standalone plan</span>
+        </div>`,
+        citation: 'MoneySense Protection Coverage Guidelines | AIA Advisory Manual Section 3.2'
+      },
+      'default': {
+        answer: `I can help you with that! Based on my knowledge of MoneySense guidelines and AIA compliance rules, here's what you should know:
+
+        <div style="margin-top: 12px;"><strong>General Compliance Principles:</strong></div>
+        <ul style="margin-top: 8px; padding-left: 20px; line-height: 1.8;">
+          <li>Always validate recommendations against MoneySense financial planning guidelines</li>
+          <li>Ensure client's income can support proposed premiums (max 15% of income)</li>
+          <li>Check that protection coverage aligns with client's life stage and needs</li>
+          <li>Document all assumptions and client acknowledgments clearly</li>
+          <li>Consider emergency fund adequacy before recommending products</li>
+        </ul>
+
+        <div style="margin-top: 12px;"><strong>For specific guidance, try asking:</strong></div>
+        <ul style="margin-top: 8px; padding-left: 20px; line-height: 1.8;">
+          <li>Questions about age-appropriate product recommendations</li>
+          <li>Premium affordability calculations</li>
+          <li>Coverage adequacy for different scenarios</li>
+          <li>Regulatory requirements for specific client profiles</li>
+        </ul>
+
+        <div style="margin-top: 12px;">Would you like me to elaborate on any specific compliance area?</div>`,
+        citation: 'CompliSense AI Knowledge Base'
+      }
+    };
+
+    // Add message to chat
+    function addMessage(text, isUser = false, citation = null) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
+
+      const avatar = isUser ? '👤' : '🤖';
+      const sender = isUser ? 'You' : 'CompliSense AI';
+      const time = 'Just now';
+
+      messageDiv.innerHTML = `
+        <div class="message-avatar">${avatar}</div>
+        <div class="message-content">
+          <div class="message-meta">${sender} • ${time}</div>
+          <div class="message-text">${text}</div>
+          ${citation ? `<div class="citation">📚 <strong>Source:</strong> ${citation}</div>` : ''}
+        </div>
+      `;
+
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Add thinking indicator
+    function addThinkingIndicator() {
+      const thinkingDiv = document.createElement('div');
+      thinkingDiv.className = 'message ai';
+      thinkingDiv.id = 'thinkingIndicator';
+      thinkingDiv.innerHTML = `
+        <div class="message-avatar">🤖</div>
+        <div class="message-content">
+          <div class="thinking-indicator">
+            <div class="thinking-dot"></div>
+            <div class="thinking-dot"></div>
+            <div class="thinking-dot"></div>
+          </div>
+        </div>
+      `;
+      chatMessages.appendChild(thinkingDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Remove thinking indicator
+    function removeThinkingIndicator() {
+      const indicator = document.getElementById('thinkingIndicator');
+      if (indicator) indicator.remove();
+    }
+
+    // Determine response type
+    function getResponseType(question) {
+      const q = question.toLowerCase();
+      if (q.includes('ilp') || q.includes('investment') || q.includes('68') || q.includes('senior') || q.includes('elderly')) {
+        return 'ilp';
+      }
+      if (q.includes('premium') || q.includes('afford') || q.includes('4500') || q.includes('4,500')) {
+        return 'premium';
+      }
+      if (q.includes('emergency') || q.includes('fund') || q.includes('savings')) {
+        return 'emergency';
+      }
+      if (q.includes('critical illness') || q.includes('ci coverage') || q.includes('60000') || q.includes('60,000')) {
+        return 'ci-coverage';
+      }
+      return 'default';
+    }
+
+    // Send message
+    function sendMessage() {
+      const message = chatInput.value.trim();
+      if (!message) return;
+
+      // Add user message
+      addMessage(message, true);
+      chatInput.value = '';
+
+      // Show thinking indicator
+      addThinkingIndicator();
+
+      // Simulate AI response delay
+      setTimeout(() => {
+        removeThinkingIndicator();
+        const responseType = getResponseType(message);
+        const response = aiResponses[responseType];
+        addMessage(response.answer, false, response.citation);
+      }, 1500);
+    }
+
+    // Ask predefined question
+    function askQuestion(question) {
+      chatInput.value = question;
+      sendMessage();
+    }
+
+    // Enter key to send
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+
+    // Auto-focus input
+    chatInput.focus();
+  </script>
+  <!-- Floating Chat Widget -->
+  <div class="chat-widget">
+    <button class="chat-widget-button" onclick="window.location.href='copilot.html'" title="Ask AI Copilot">
+      💬
+    </button>
+    <div class="chat-widget-tooltip">Ask AI Copilot</div>
+  </div>
+
+</body>
+</html>

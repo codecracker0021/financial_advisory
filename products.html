@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>CompliSense AI - Product Recommendations</title>
+
+  <link rel="stylesheet" href="styles/aia-theme.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <style>
+    .page-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: var(--space-xl);
+    }
+
+    .client-summary-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: var(--space-xl);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-xl);
+    }
+
+    .client-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: var(--space-lg);
+      margin-top: var(--space-lg);
+    }
+
+    .client-stat {
+      text-align: center;
+    }
+
+    .client-stat-value {
+      font-size: var(--font-size-2xl);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .client-stat-label {
+      font-size: var(--font-size-sm);
+      opacity: 0.9;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: var(--space-lg);
+      margin-bottom: var(--space-xl);
+    }
+
+    .product-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .product-card.recommended {
+      border-color: var(--aia-red);
+    }
+
+    .product-card-header {
+      padding: var(--space-lg);
+      background: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .product-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+      margin-bottom: var(--space-sm);
+    }
+
+    .product-badge.best-match {
+      background-color: var(--aia-red);
+      color: white;
+    }
+
+    .product-badge.good-fit {
+      background-color: #10B981;
+      color: white;
+    }
+
+    .product-badge.alternative {
+      background-color: var(--gray-400);
+      color: white;
+    }
+
+    .product-name {
+      font-size: var(--font-size-xl);
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 4px;
+    }
+
+    .product-type {
+      font-size: var(--font-size-sm);
+      color: var(--gray-600);
+    }
+
+    .product-body {
+      padding: var(--space-lg);
+    }
+
+    .match-score {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-bottom: var(--space-lg);
+      padding: var(--space-md);
+      background: var(--gray-50);
+      border-radius: var(--radius-md);
+    }
+
+    .match-score-circle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--font-size-xl);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .match-score-circle.excellent {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      color: white;
+    }
+
+    .match-score-circle.good {
+      background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+      color: white;
+    }
+
+    .match-score-circle.fair {
+      background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+      color: white;
+    }
+
+    .product-features {
+      list-style: none;
+      margin-bottom: var(--space-lg);
+    }
+
+    .product-features li {
+      padding: var(--space-sm) 0;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      font-size: var(--font-size-sm);
+      color: var(--gray-700);
+    }
+
+    .product-features li::before {
+      content: "✓";
+      color: #10B981;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .compliance-checks {
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      padding: var(--space-md);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-lg);
+    }
+
+    .compliance-checks h4 {
+      font-size: var(--font-size-sm);
+      color: var(--success-text);
+      margin-bottom: var(--space-sm);
+      font-weight: 600;
+    }
+
+    .compliance-check-item {
+      font-size: var(--font-size-xs);
+      color: var(--success-text);
+      padding: 4px 0;
+    }
+
+    .why-recommended {
+      background: var(--info-bg);
+      border-left: 3px solid var(--info-border);
+      padding: var(--space-md);
+      border-radius: var(--radius-sm);
+      margin-bottom: var(--space-lg);
+    }
+
+    .why-recommended h4 {
+      font-size: var(--font-size-sm);
+      color: var(--info-text);
+      margin-bottom: var(--space-sm);
+      font-weight: 600;
+    }
+
+    .why-recommended p {
+      font-size: var(--font-size-sm);
+      color: var(--gray-700);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .product-footer {
+      padding: var(--space-lg);
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+
+    .price-tag {
+      font-size: var(--font-size-2xl);
+      font-weight: 700;
+      color: var(--aia-red);
+      margin-bottom: var(--space-sm);
+    }
+
+    .price-detail {
+      font-size: var(--font-size-sm);
+      color: var(--gray-600);
+      margin-bottom: var(--space-md);
+    }
+
+    .product-actions {
+      display: flex;
+      gap: var(--space-sm);
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span style="font-size: 28px;">🧠</span>
+      <span>CompliSense AI</span>
+    </a>
+    <ul class="navbar-menu">
+      <li><a href="index.html">FHR Form</a></li>
+      <li><a href="products.html" class="active">Products</a></li>
+      <li><a href="portfolio.html">Portfolio</a></li>
+      <li class="nav-dropdown">
+        <span class="nav-dropdown-toggle">AI Tools ▾</span>
+        <div class="nav-dropdown-menu">
+          <a href="copilot.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">💬</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">AI Copilot</div>
+              <div class="nav-dropdown-item-desc">Chat compliance assistant</div>
+            </div>
+          </a>
+          <a href="analytics.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">📈</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Performance Analytics</div>
+              <div class="nav-dropdown-item-desc">Track metrics & anomalies</div>
+            </div>
+          </a>
+          <a href="graph.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">🕸️</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Compliance Graph</div>
+              <div class="nav-dropdown-item-desc">Visualize relationships</div>
+            </div>
+          </a>
+          <a href="documents.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">📄</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Document Intelligence</div>
+              <div class="nav-dropdown-item-desc">OCR & extraction</div>
+            </div>
+          </a>
+          <a href="regulatory.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">🔔</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Regulatory Updates</div>
+              <div class="nav-dropdown-item-desc">Latest MAS notices</div>
+            </div>
+          </a>
+        </div>
+      </li>
+      <li><a href="supervisor.html">Supervisor</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <span class="text-gray">Agent: <strong>MAHADEVAN KARTIK</strong></span>
+      
+    </div>
+  </nav>
+
+  <!-- Page Container -->
+  <div class="page-container">
+    <!-- Alert -->
+    <div class="alert alert-success" style="margin-bottom: var(--space-xl);">
+      <span class="alert-icon">✨</span>
+      <div class="alert-content">
+        <div class="alert-title">AI-Powered Product Matching Complete</div>
+        <div>CompliSense AI analyzed 247 AIA products and selected the top 3 matches based on your client's profile, MoneySense guidelines, and compliance requirements.</div>
+      </div>
+    </div>
+
+    <!-- Client Summary -->
+    <div class="client-summary-card">
+      <div style="display: flex; justify-content: space-between; align-items: start;">
+        <div>
+          <h2 style="margin: 0 0 var(--space-sm) 0;">Tan Wei Ming</h2>
+          <p style="margin: 0; opacity: 0.9;">35 years old • Starting a Family • 2 Children</p>
+        </div>
+        <button class="btn btn-secondary" style="background: white; color: var(--gray-900);" onclick="window.location.href='index.html'">
+          ← Back to FHR Form
+        </button>
+      </div>
+
+      <div class="client-stats">
+        <div class="client-stat">
+          <div class="client-stat-value">$4,500</div>
+          <div class="client-stat-label">Monthly Income</div>
+        </div>
+        <div class="client-stat">
+          <div class="client-stat-value">$675</div>
+          <div class="client-stat-label">Max Premium (15%)</div>
+        </div>
+        <div class="client-stat">
+          <div class="client-stat-value">$486k</div>
+          <div class="client-stat-label">Required Death Coverage (9x)</div>
+        </div>
+        <div class="client-stat">
+          <div class="client-stat-value">$216k</div>
+          <div class="client-stat-label">Required CI Coverage (4x)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Header -->
+    <div class="section-header">
+      <h2 class="section-title">🎯 Recommended Products</h2>
+      <div class="section-actions">
+        <button class="btn btn-ghost">Filter</button>
+        <button class="btn btn-ghost">Compare All</button>
+      </div>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="product-grid">
+      <!-- Product 1: Best Match -->
+      <div class="product-card recommended">
+        <div class="product-card-header">
+          <span class="product-badge best-match">🏆 BEST MATCH</span>
+          <div class="product-name">AIA Family Protect Plus</div>
+          <div class="product-type">Term Life Insurance with CI Rider</div>
+        </div>
+
+        <div class="product-body">
+          <!-- Match Score -->
+          <div class="match-score">
+            <div class="match-score-circle excellent">94%</div>
+            <div>
+              <div style="font-weight: 600; margin-bottom: 4px;">Excellent Suitability Match</div>
+              <div style="font-size: var(--font-size-sm); color: var(--gray-600);">Optimal for client's profile & life stage</div>
+            </div>
+          </div>
+
+          <!-- Why Recommended -->
+          <div class="why-recommended">
+            <h4>💡 Why CompliSense AI Recommends This</h4>
+            <p>Perfect for clients with young children. Provides comprehensive protection (death + CI) at affordable premium within MoneySense 15% guideline. Meets 9x income death coverage and 4x CI coverage targets.</p>
+          </div>
+
+          <!-- Features -->
+          <ul class="product-features">
+            <li>Death/TPD Coverage: $500,000</li>
+            <li>Critical Illness Rider: $220,000</li>
+            <li>Policy Term: 20 years (until age 55)</li>
+            <li>Total Coverage: $720,000 protection</li>
+            <li>Education Fund Rider: Optional add-on</li>
+          </ul>
+
+          <!-- Compliance Checks -->
+          <div class="compliance-checks">
+            <h4>✅ MoneySense Compliance</h4>
+            <div class="compliance-check-item">✓ Premium 14.4% of income (within 15% limit)</div>
+            <div class="compliance-check-item">✓ Death coverage 9.3x annual income (meets 9x target)</div>
+            <div class="compliance-check-item">✓ CI coverage 4.1x annual income (meets 4x target)</div>
+            <div class="compliance-check-item">✓ Life stage appropriate (Starting Family)</div>
+          </div>
+        </div>
+
+        <div class="product-footer">
+          <div class="price-tag">$650/month</div>
+          <div class="price-detail">14.4% of monthly income • $7,800/year</div>
+          <div class="product-actions">
+            <button class="btn btn-primary" style="flex: 1;" onclick="applyToFHR('Family Protect Plus', 650)">
+              Apply to FHR Form
+            </button>
+            <button class="btn btn-ghost">Details</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product 2: Good Fit -->
+      <div class="product-card">
+        <div class="product-card-header">
+          <span class="product-badge good-fit">GOOD FIT</span>
+          <div class="product-name">AIA Prime Protect</div>
+          <div class="product-type">Whole Life Insurance</div>
+        </div>
+
+        <div class="product-body">
+          <!-- Match Score -->
+          <div class="match-score">
+            <div class="match-score-circle good">87%</div>
+            <div>
+              <div style="font-weight: 600; margin-bottom: 4px;">Good Suitability Match</div>
+              <div style="font-size: var(--font-size-sm); color: var(--gray-600);">Suitable with minor trade-offs</div>
+            </div>
+          </div>
+
+          <!-- Why Recommended -->
+          <div class="why-recommended">
+            <h4>💡 Why CompliSense AI Recommends This</h4>
+            <p>Provides lifetime coverage with cash value accumulation. Slightly higher premium but includes savings component. Good for clients prioritizing long-term wealth building alongside protection.</p>
+          </div>
+
+          <!-- Features -->
+          <ul class="product-features">
+            <li>Death/TPD Coverage: $450,000</li>
+            <li>Lifetime Coverage (no expiry)</li>
+            <li>Cash Value: Builds over time</li>
+            <li>Guaranteed maturity benefit</li>
+            <li>Loan facility available after 3 years</li>
+          </ul>
+
+          <!-- Compliance Checks -->
+          <div class="compliance-checks">
+            <h4>✅ MoneySense Compliance</h4>
+            <div class="compliance-check-item">✓ Premium 15.0% of income (at 15% limit)</div>
+            <div class="compliance-check-item">⚠️ Death coverage 8.3x income (slightly below 9x)</div>
+            <div class="compliance-check-item">⚠️ No CI coverage (recommend separate CI plan)</div>
+            <div class="compliance-check-item">✓ Life stage appropriate</div>
+          </div>
+        </div>
+
+        <div class="product-footer">
+          <div class="price-tag">$675/month</div>
+          <div class="price-detail">15.0% of monthly income • $8,100/year</div>
+          <div class="product-actions">
+            <button class="btn btn-secondary" style="flex: 1;" onclick="applyToFHR('Prime Protect', 675)">
+              Apply to FHR Form
+            </button>
+            <button class="btn btn-ghost">Details</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product 3: Alternative -->
+      <div class="product-card">
+        <div class="product-card-header">
+          <span class="product-badge alternative">ALTERNATIVE</span>
+          <div class="product-name">AIA Essential Term</div>
+          <div class="product-type">Basic Term Life Insurance</div>
+        </div>
+
+        <div class="product-body">
+          <!-- Match Score -->
+          <div class="match-score">
+            <div class="match-score-circle fair">79%</div>
+            <div>
+              <div style="font-weight: 600; margin-bottom: 4px;">Fair Suitability Match</div>
+              <div style="font-size: var(--font-size-sm); color: var(--gray-600);">Budget-friendly basic protection</div>
+            </div>
+          </div>
+
+          <!-- Why Recommended -->
+          <div class="why-recommended">
+            <h4>💡 Why CompliSense AI Recommends This</h4>
+            <p>Most affordable option for basic death coverage. Best for clients with tight budgets who need immediate protection. Can add CI plan separately later when finances improve.</p>
+          </div>
+
+          <!-- Features -->
+          <ul class="product-features">
+            <li>Death/TPD Coverage: $500,000</li>
+            <li>Policy Term: 20 years</li>
+            <li>No cash value (pure protection)</li>
+            <li>Renewable and convertible options</li>
+            <li>Fixed premium throughout term</li>
+          </ul>
+
+          <!-- Compliance Checks -->
+          <div class="compliance-checks">
+            <h4>✅ MoneySense Compliance</h4>
+            <div class="compliance-check-item">✓ Premium 7.8% of income (well within 15%)</div>
+            <div class="compliance-check-item">✓ Death coverage 9.3x income (meets 9x target)</div>
+            <div class="compliance-check-item">❌ No CI coverage (need separate plan)</div>
+            <div class="compliance-check-item">✓ Life stage appropriate</div>
+          </div>
+        </div>
+
+        <div class="product-footer">
+          <div class="price-tag">$350/month</div>
+          <div class="price-detail">7.8% of monthly income • $4,200/year</div>
+          <div class="product-actions">
+            <button class="btn btn-secondary" style="flex: 1;" onclick="applyToFHR('Essential Term', 350)">
+              Apply to FHR Form
+            </button>
+            <button class="btn btn-ghost">Details</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Info -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">📊 Product Comparison Summary</h3>
+      </div>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--gray-200);">
+              <th style="padding: var(--space-md); text-align: left;">Feature</th>
+              <th style="padding: var(--space-md); text-align: center; color: var(--aia-red);">Family Protect Plus ⭐</th>
+              <th style="padding: var(--space-md); text-align: center;">Prime Protect</th>
+              <th style="padding: var(--space-md); text-align: center;">Essential Term</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--gray-200);">
+              <td style="padding: var(--space-md);">Monthly Premium</td>
+              <td style="padding: var(--space-md); text-align: center; font-weight: 600;">$650</td>
+              <td style="padding: var(--space-md); text-align: center;">$675</td>
+              <td style="padding: var(--space-md); text-align: center;">$350</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--gray-200);">
+              <td style="padding: var(--space-md);">Death Coverage</td>
+              <td style="padding: var(--space-md); text-align: center;">$500,000</td>
+              <td style="padding: var(--space-md); text-align: center;">$450,000</td>
+              <td style="padding: var(--space-md); text-align: center;">$500,000</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--gray-200);">
+              <td style="padding: var(--space-md);">CI Coverage</td>
+              <td style="padding: var(--space-md); text-align: center; color: #10B981;">✓ $220,000</td>
+              <td style="padding: var(--space-md); text-align: center; color: var(--gray-400);">✗ None</td>
+              <td style="padding: var(--space-md); text-align: center; color: var(--gray-400);">✗ None</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--gray-200);">
+              <td style="padding: var(--space-md);">MoneySense Score</td>
+              <td style="padding: var(--space-md); text-align: center; color: #10B981; font-weight: 600;">98/100</td>
+              <td style="padding: var(--space-md); text-align: center; color: #F59E0B;">85/100</td>
+              <td style="padding: var(--space-md); text-align: center; color: #F59E0B;">78/100</td>
+            </tr>
+            <tr>
+              <td style="padding: var(--space-md);">Suitability Match</td>
+              <td style="padding: var(--space-md); text-align: center; color: #10B981; font-weight: 600;">94%</td>
+              <td style="padding: var(--space-md); text-align: center;">87%</td>
+              <td style="padding: var(--space-md); text-align: center;">79%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Chat Widget -->
+  <div class="chat-widget">
+    <button class="chat-widget-button" onclick="window.location.href='copilot.html'" title="Ask AI Copilot">
+      💬
+    </button>
+    <div class="chat-widget-tooltip">Ask AI Copilot</div>
+  </div>
+
+  <script>
+    function applyToFHR(productName, premium) {
+      alert(`✅ Product Applied to FHR Form\n\nProduct: ${productName}\nMonthly Premium: $${premium}\n\nReturning to FHR form with pre-filled product details...`);
+      // In a real application, this would pass data back to the form
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 1000);
+    }
+  </script>
+</body>
+</html>

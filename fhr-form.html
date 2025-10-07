@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>CompliSense AI - Financial Health Review</title>
+
+  <link rel="stylesheet" href="styles/aia-theme.css">
+  <link rel="stylesheet" href="styles/components.css">
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="#" class="navbar-brand">
+      <span style="font-size: 28px;">🧠</span>
+      <span>CompliSense AI</span>
+    </a>
+    <ul class="navbar-menu">
+      <li><a href="index.html" class="active">FHR Form</a></li>
+      <li><a href="products.html">Products</a></li>
+      <li><a href="portfolio.html">Portfolio</a></li>
+      <li class="nav-dropdown">
+        <span class="nav-dropdown-toggle">
+          AI Tools ▾
+        </span>
+        <div class="nav-dropdown-menu">
+          <a href="copilot.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">💬</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">AI Copilot</div>
+              <div class="nav-dropdown-item-desc">Chat compliance assistant</div>
+            </div>
+          </a>
+          <a href="analytics.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">📈</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Performance Analytics</div>
+              <div class="nav-dropdown-item-desc">Track metrics & anomalies</div>
+            </div>
+          </a>
+          <a href="graph.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">🕸️</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Compliance Graph</div>
+              <div class="nav-dropdown-item-desc">Visualize relationships</div>
+            </div>
+          </a>
+          <a href="documents.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">📄</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Document Intelligence</div>
+              <div class="nav-dropdown-item-desc">OCR & extraction</div>
+            </div>
+          </a>
+          <a href="regulatory.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">🔔</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Regulatory Updates</div>
+              <div class="nav-dropdown-item-desc">Latest MAS notices</div>
+            </div>
+          </a>
+        </div>
+      </li>
+      <li><a href="supervisor.html">Supervisor</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <span class="text-gray">Agent: <strong>MAHADEVAN KARTIK</strong></span>
+      
+    </div>
+  </nav>
+
+  <!-- Alert Banner -->
+  <div style="padding: var(--space-md) var(--space-xl); max-width: 1440px; margin: 0 auto;">
+    <div class="alert alert-info">
+      <span class="alert-icon">💡</span>
+      <div class="alert-content">
+        <div class="alert-title">AI Compliance Assistant Active</div>
+        <div>CompliSense AI is monitoring your inputs in real-time against MoneySense guidelines and AIA compliance rules.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="two-column-layout">
+    <!-- Left Column: FHR Form -->
+    <main class="main-content">
+      <div class="card">
+        <div class="card-header">
+          <div class="section-header" style="margin-bottom: 0; padding-bottom: 0; border: none;">
+            <h2 class="section-title">
+              📋 Financial Health Review (FHR) Form
+            </h2>
+            <div class="section-actions">
+              <button class="btn btn-ghost">Save Draft</button>
+              <button class="btn btn-primary" id="submitBtn" disabled>Submit for Review</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div style="margin-bottom: var(--space-xl);">
+          <div class="flex justify-between mb-sm">
+            <span class="text-sm text-bold">Form Completion</span>
+            <span class="text-sm text-gray" id="progressText">0%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Client Information Section -->
+        <div style="margin-bottom: var(--space-2xl);">
+          <h3 class="mb-lg">Client Information</h3>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg);">
+            <div class="form-group">
+              <label class="form-label form-label-required">Client Name</label>
+              <input type="text" class="form-input" id="clientName" placeholder="Enter client name">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label form-label-required">Age</label>
+              <input type="number" class="form-input" id="age" placeholder="Enter age">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label form-label-required">Monthly Income (SGD)</label>
+              <input type="number" class="form-input" id="monthlyIncome" placeholder="5000">
+              <div class="form-help">Gross monthly income before deductions</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label form-label-required">Monthly Expenses (SGD)</label>
+              <input type="number" class="form-input" id="monthlyExpenses" placeholder="3000">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label form-label-required">Emergency Fund (SGD)</label>
+              <input type="number" class="form-input" id="emergencyFund" placeholder="15000">
+              <div class="form-help">Current liquid savings for emergencies</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Retirement Savings (SGD/month)</label>
+              <input type="number" class="form-input" id="retirementSavings" placeholder="500">
+              <div class="form-help">Monthly contribution to CPF/retirement funds</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Has Children?</label>
+              <select class="form-select" id="hasChildren">
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+              </select>
+            </div>
+
+            <div class="form-group" id="numChildrenGroup">
+              <label class="form-label">Number of Children</label>
+              <input type="number" class="form-input" id="numChildren" placeholder="0">
+            </div>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Product Recommendation Section -->
+        <div style="margin-bottom: var(--space-2xl);">
+          <h3 class="mb-lg">Product Recommendation</h3>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg);">
+            <div class="form-group">
+              <label class="form-label form-label-required">Product Type</label>
+              <select class="form-select" id="productType">
+                <option value="term-life">Term Life Insurance</option>
+                <option value="whole-life">Whole Life Insurance</option>
+                <option value="investment-linked">Investment-Linked Policy</option>
+                <option value="savings">Savings Plan</option>
+                <option value="critical-illness">Critical Illness</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label form-label-required">Monthly Premium (SGD)</label>
+              <input type="number" class="form-input" id="monthlyPremium" placeholder="500">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label form-label-required">Death/TPD Coverage (SGD)</label>
+              <input type="number" class="form-input" id="deathCoverage" placeholder="500000">
+              <div class="form-help">Total protection amount for death/total permanent disability</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Critical Illness Coverage (SGD)</label>
+              <input type="number" class="form-input" id="ciCoverage" placeholder="200000">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Policy Term (Years)</label>
+              <input type="number" class="form-input" id="policyTerm" placeholder="20">
+            </div>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Justification Section -->
+        <div style="margin-bottom: var(--space-xl);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-lg);">
+            <h3>Advisory Justification</h3>
+            <div style="display: flex; gap: var(--space-sm); align-items: center;">
+              <span class="badge" id="qualityBadge" style="display: none;">Quality: 0%</span>
+              <button class="btn btn-ghost btn-sm" id="aiSuggestBtn" onclick="showAISuggestions()">
+                ✨ AI Suggestions
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label form-label-required">Recommendation Rationale</label>
+            <textarea class="form-textarea" id="justification" rows="5" placeholder="Explain why this recommendation is suitable for the client..."></textarea>
+            <div class="form-help">Provide detailed justification for product suitability</div>
+          </div>
+
+          <!-- AI Analysis Panel -->
+          <div id="aiAnalysisPanel" style="display: none; margin-top: var(--space-lg);"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Right Column: Compliance Dashboard -->
+    <aside class="sidebar">
+      <!-- Compliance Score Card -->
+      <div class="compliance-score-card">
+        <div class="compliance-score-value" id="complianceScore">--</div>
+        <div class="compliance-score-label">MoneySense Compliance Score</div>
+        <div style="margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid rgba(255,255,255,0.3);">
+          <div class="text-sm" style="opacity: 0.9;">Status: <span id="complianceStatus" style="font-weight: 600;">Calculating...</span></div>
+        </div>
+      </div>
+
+      <!-- Field-Level Completion Tracker (Compact) -->
+      <div class="card" style="margin-bottom: var(--space-lg);">
+        <div class="card-header" style="cursor: pointer;" onclick="toggleFieldTracker()">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 class="card-title">📋 Field Completion</h3>
+            <div style="display: flex; gap: var(--space-xs); align-items: center;">
+              <span id="overall-progress-badge" class="badge">0/9</span>
+              <span id="tracker-toggle-icon" style="font-size: 20px; transition: transform 0.3s;">▼</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compact Summary (Always Visible) -->
+        <div style="padding: var(--space-md); display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-sm);">
+          <div class="compact-section" onclick="toggleFieldTracker()">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span style="font-size: 11px; font-weight: 600; color: var(--gray-600);">CLIENT INFO</span>
+              <span id="section1-progress" class="badge badge-sm">0/5</span>
+            </div>
+            <div class="progress-bar" style="height: 4px;">
+              <div id="section1-bar" class="progress-bar-fill" style="width: 0%; transition: width 0.3s ease;"></div>
+            </div>
+          </div>
+
+          <div class="compact-section" onclick="toggleFieldTracker()">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span style="font-size: 11px; font-weight: 600; color: var(--gray-600);">PRODUCT</span>
+              <span id="section2-progress" class="badge badge-sm">0/3</span>
+            </div>
+            <div class="progress-bar" style="height: 4px;">
+              <div id="section2-bar" class="progress-bar-fill" style="width: 0%; transition: width 0.3s ease;"></div>
+            </div>
+          </div>
+
+          <div class="compact-section" onclick="toggleFieldTracker()">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span style="font-size: 11px; font-weight: 600; color: var(--gray-600);">JUSTIFICATION</span>
+              <span id="section3-progress" class="badge badge-sm">0/1</span>
+            </div>
+            <div class="progress-bar" style="height: 4px;">
+              <div id="section3-bar" class="progress-bar-fill" style="width: 0%; transition: width 0.3s ease;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Expandable Details (Hidden by Default) -->
+        <div id="fieldTrackerDetails" style="display: none; padding: 0 var(--space-md) var(--space-md) var(--space-md); border-top: 1px solid var(--gray-200);">
+          <div style="margin-top: var(--space-md);">
+            <!-- Section 1: Client Information -->
+            <div class="section-tracker" style="margin-bottom: var(--space-md);">
+              <div style="font-weight: 600; font-size: 13px; color: var(--gray-700); margin-bottom: var(--space-xs);">Client Information</div>
+              <div id="section1-fields" style="font-size: 12px; color: var(--gray-600); display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
+                <!-- Will be populated by JS -->
+              </div>
+            </div>
+
+            <!-- Section 2: Product Recommendation -->
+            <div class="section-tracker" style="margin-bottom: var(--space-md);">
+              <div style="font-weight: 600; font-size: 13px; color: var(--gray-700); margin-bottom: var(--space-xs);">Product Recommendation</div>
+              <div id="section2-fields" style="font-size: 12px; color: var(--gray-600); display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
+                <!-- Will be populated by JS -->
+              </div>
+            </div>
+
+            <!-- Section 3: Justification -->
+            <div class="section-tracker">
+              <div style="font-weight: 600; font-size: 13px; color: var(--gray-700); margin-bottom: var(--space-xs);">Justification</div>
+              <div id="section3-fields" style="font-size: 12px; color: var(--gray-600);">
+                <!-- Will be populated by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Validation Results -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Compliance Checks</h3>
+        </div>
+
+        <div id="validationResults">
+          <div style="text-align: center; padding: var(--space-xl); color: var(--gray-500);">
+            <div style="font-size: 48px; margin-bottom: var(--space-md);">⏳</div>
+            <div>Enter client information to see real-time compliance validation</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions (Form-Specific) -->
+      <div class="card" style="margin-top: var(--space-lg);">
+        <div class="card-header">
+          <h3 class="card-title">Quick Actions</h3>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
+          <button class="btn btn-secondary" onclick="window.location.href='copilot.html'">
+            💬 Ask AI Copilot
+          </button>
+          <button class="btn btn-ghost" onclick="window.location.href='products.html'">
+            📊 View Product Alternatives
+          </button>
+          <button class="btn btn-ghost" onclick="window.location.href='report.html'">
+            📄 Generate Suitability Report
+          </button>
+          <button class="btn btn-ghost" onclick="window.location.href='documents.html'">
+            📤 Upload Client Documents
+          </button>
+        </div>
+
+        <div style="margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--gray-200);">
+          <a href="portfolio.html" style="display: block; text-align: center; color: var(--aia-red); font-size: var(--font-size-sm); text-decoration: none; font-weight: 600;">
+            View All Platform Tools →
+          </a>
+        </div>
+      </div>
+
+      <!-- MoneySense Reference -->
+      <div style="margin-top: var(--space-lg); padding: var(--space-md); background: var(--gray-50); border-radius: var(--radius-md); font-size: var(--font-size-sm);">
+        <div style="font-weight: 600; margin-bottom: var(--space-sm); color: var(--gray-700);">
+          📚 MoneySense Guidelines
+        </div>
+        <ul style="list-style: none; color: var(--gray-600); line-height: 1.8;">
+          <li>✓ Max 15% of income on insurance</li>
+          <li>✓ Death coverage: 9x annual income</li>
+          <li>✓ CI coverage: 4x annual income</li>
+          <li>✓ Emergency fund: 3-6 months expenses</li>
+          <li>✓ Min 10% to retirement savings</li>
+        </ul>
+        <a href="https://www.moneysense.gov.sg" target="_blank" style="color: var(--aia-red); font-size: var(--font-size-xs); margin-top: var(--space-sm); display: block;">
+          Learn more at MoneySense →
+        </a>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Floating Chat Widget -->
+  <div class="chat-widget">
+    <button class="chat-widget-button" onclick="window.location.href='copilot.html'" title="Ask AI Copilot">
+      💬
+    </button>
+    <div class="chat-widget-tooltip">Ask AI Copilot</div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="scripts/validation.js"></script>
+  <script>
+    // Sample FHR data (same as index.html)
+    const fhrDatabase = {
+      'FHR-2025-001': {
+        clientName: 'Tan Wei Ming',
+        age: 35,
+        monthlyIncome: 4500,
+        monthlyExpenses: 3200,
+        emergencyFund: 8000,
+        retirementSavings: 360,
+        hasChildren: 'yes',
+        numChildren: 2,
+        productType: 'term-life',
+        monthlyPremium: 800,
+        deathCoverage: 450000,
+        ciCoverage: 150000,
+        policyTerm: 20,
+        justification: 'Client has expressed need for family protection with 2 young children (ages 3 and 5). Current income of $4,500/month supports proposed premium. Client has moderate risk appetite and prioritizes protection over investment growth at this life stage.'
+      },
+      'FHR-2025-002': {
+        clientName: 'Lim Siew Hoon',
+        age: 42,
+        monthlyIncome: 7200,
+        monthlyExpenses: 4800,
+        emergencyFund: 30000,
+        retirementSavings: 900,
+        hasChildren: 'yes',
+        numChildren: 2,
+        productType: 'whole-life',
+        monthlyPremium: 1200,
+        deathCoverage: 600000,
+        ciCoverage: 250000,
+        policyTerm: 99,
+        justification: 'Client requires comprehensive lifetime coverage with cash value accumulation. Two children aged 8 and 10 require education funding. Client has stable income and strong emergency fund to support higher premiums.'
+      },
+      'FHR-2025-003': {
+        clientName: 'Chen Xiao Ming',
+        age: 28,
+        monthlyIncome: 5500,
+        monthlyExpenses: 3000,
+        emergencyFund: 20000,
+        retirementSavings: 650,
+        hasChildren: 'no',
+        numChildren: 0,
+        productType: 'term-life',
+        monthlyPremium: 550,
+        deathCoverage: 450000,
+        ciCoverage: 200000,
+        policyTerm: 25,
+        justification: 'Young professional with no dependents. Seeking affordable protection coverage with critical illness rider. Premium well within affordability at 10% of income. Plans to start family in 3-5 years.'
+      }
+    };
+
+    // Get FHR ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const fhrId = urlParams.get('id');
+    const isNewForm = urlParams.get('new') === 'true';
+
+    // Form elements
+    const formInputs = {
+      clientName: document.getElementById('clientName'),
+      age: document.getElementById('age'),
+      monthlyIncome: document.getElementById('monthlyIncome'),
+      monthlyExpenses: document.getElementById('monthlyExpenses'),
+      emergencyFund: document.getElementById('emergencyFund'),
+      retirementSavings: document.getElementById('retirementSavings'),
+      hasChildren: document.getElementById('hasChildren'),
+      numChildren: document.getElementById('numChildren'),
+      productType: document.getElementById('productType'),
+      monthlyPremium: document.getElementById('monthlyPremium'),
+      deathCoverage: document.getElementById('deathCoverage'),
+      ciCoverage: document.getElementById('ciCoverage'),
+      policyTerm: document.getElementById('policyTerm'),
+      justification: document.getElementById('justification')
+    };
+
+    // UI elements
+    const complianceScoreEl = document.getElementById('complianceScore');
+    const complianceStatusEl = document.getElementById('complianceStatus');
+    const validationResultsEl = document.getElementById('validationResults');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Get form data
+    function getFormData() {
+      return {
+        clientName: formInputs.clientName.value,
+        age: formInputs.age.value,
+        monthlyIncome: formInputs.monthlyIncome.value,
+        monthlyExpenses: formInputs.monthlyExpenses.value,
+        emergencyFund: formInputs.emergencyFund.value,
+        retirementSavings: formInputs.retirementSavings.value,
+        hasChildren: formInputs.hasChildren.value,
+        numChildren: formInputs.numChildren.value,
+        productType: formInputs.productType.value,
+        monthlyPremium: formInputs.monthlyPremium.value,
+        deathCoverage: formInputs.deathCoverage.value,
+        ciCoverage: formInputs.ciCoverage.value,
+        policyTerm: formInputs.policyTerm.value,
+        justification: formInputs.justification.value
+      };
+    }
+
+    // Field-level completion tracking
+    const fieldSections = {
+      section1: {
+        name: 'Client Information',
+        fields: [
+          { id: 'clientName', label: 'Client Name', required: true },
+          { id: 'age', label: 'Age', required: true },
+          { id: 'monthlyIncome', label: 'Monthly Income', required: true },
+          { id: 'monthlyExpenses', label: 'Monthly Expenses', required: true },
+          { id: 'emergencyFund', label: 'Emergency Fund', required: true },
+          { id: 'retirementSavings', label: 'Retirement Savings', required: false }
+        ]
+      },
+      section2: {
+        name: 'Product Recommendation',
+        fields: [
+          { id: 'productType', label: 'Product Type', required: true },
+          { id: 'monthlyPremium', label: 'Monthly Premium', required: true },
+          { id: 'deathCoverage', label: 'Death/TPD Coverage', required: true }
+        ]
+      },
+      section3: {
+        name: 'Justification',
+        fields: [
+          { id: 'justification', label: 'Recommendation Rationale', required: true }
+        ]
+      }
+    };
+
+    function updateFieldTracker() {
+      const data = getFormData();
+      let totalRequired = 0;
+      let totalFilled = 0;
+
+      Object.keys(fieldSections).forEach(sectionKey => {
+        const section = fieldSections[sectionKey];
+        const requiredFields = section.fields.filter(f => f.required);
+        let filledCount = 0;
+        let html = '';
+
+        section.fields.forEach(field => {
+          const value = data[field.id];
+          const isFilled = value && value.toString().trim() !== '';
+
+          if (field.required) {
+            totalRequired++;
+            if (isFilled) {
+              filledCount++;
+              totalFilled++;
+            }
+          }
+
+          let icon = '';
+          let color = '';
+          let status = '';
+
+          if (isFilled) {
+            icon = '✓';
+            color = '#10B981'; // green
+            status = 'Complete';
+          } else if (field.required) {
+            icon = '❌';
+            color = '#EF4444'; // red
+            status = 'Missing';
+          } else {
+            icon = '○';
+            color = '#9CA3AF'; // gray
+            status = 'Optional';
+          }
+
+          // Compact inline display
+          html += `<div onclick="focusField('${field.id}')" style="display: flex; align-items: center; gap: 4px; padding: 2px 6px; background: ${isFilled ? '#F0FDF4' : '#FEF2F2'}; border-radius: 3px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+            <span style="color: ${color}; font-size: 14px;">${icon}</span>
+            <span style="color: ${color}; font-size: 11px; flex: 1;">${field.label}</span>
+          </div>`;
+        });
+
+        const progressPercent = requiredFields.length > 0
+          ? Math.round((filledCount / requiredFields.length) * 100)
+          : 100;
+
+        // Update progress badge
+        const progressBadge = document.getElementById(`${sectionKey}-progress`);
+        progressBadge.textContent = `${filledCount}/${requiredFields.length}`;
+
+        if (filledCount === requiredFields.length) {
+          progressBadge.className = 'badge badge-success badge-sm';
+        } else if (filledCount > 0) {
+          progressBadge.className = 'badge badge-warning badge-sm';
+        } else {
+          progressBadge.className = 'badge badge-error badge-sm';
+        }
+
+        // Update progress bar
+        const progressBar = document.getElementById(`${sectionKey}-bar`);
+        progressBar.style.width = progressPercent + '%';
+
+        if (progressPercent === 100) {
+          progressBar.classList.add('success');
+        } else {
+          progressBar.classList.remove('success');
+        }
+
+        // Update field list
+        document.getElementById(`${sectionKey}-fields`).innerHTML = html;
+      });
+
+      // Update overall progress badge
+      const overallBadge = document.getElementById('overall-progress-badge');
+      overallBadge.textContent = `${totalFilled}/${totalRequired}`;
+
+      if (totalFilled === totalRequired) {
+        overallBadge.className = 'badge badge-success';
+      } else if (totalFilled > 0) {
+        overallBadge.className = 'badge badge-warning';
+      } else {
+        overallBadge.className = 'badge badge-error';
+      }
+    }
+
+    // Toggle field tracker details
+    function toggleFieldTracker() {
+      const details = document.getElementById('fieldTrackerDetails');
+      const icon = document.getElementById('tracker-toggle-icon');
+
+      if (details.style.display === 'none') {
+        details.style.display = 'block';
+        icon.style.transform = 'rotate(180deg)';
+      } else {
+        details.style.display = 'none';
+        icon.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    // Calculate form completion
+    function calculateProgress() {
+      const data = getFormData();
+      const requiredFields = ['clientName', 'age', 'monthlyIncome', 'monthlyExpenses', 'emergencyFund', 'productType', 'monthlyPremium', 'deathCoverage', 'justification'];
+      const filled = requiredFields.filter(field => data[field] && data[field].trim() !== '').length;
+      return Math.round((filled / requiredFields.length) * 100);
+    }
+
+    // Update progress bar
+    function updateProgress() {
+      const progress = calculateProgress();
+      progressBar.style.width = progress + '%';
+      progressText.textContent = progress + '%';
+
+      if (progress === 100) {
+        progressBar.classList.add('success');
+        submitBtn.disabled = false;
+      } else {
+        progressBar.classList.remove('success');
+        submitBtn.disabled = true;
+      }
+
+      // Update field-level tracker
+      updateFieldTracker();
+    }
+
+    // Render validation results
+    function renderValidationResults(validation) {
+      if (!validation.results || validation.results.length === 0) return;
+
+      const html = validation.results.map(result => {
+        const iconSymbol = result.status === 'pass' ? '✓' : result.status === 'warning' ? '⚠' : '✗';
+
+        return `
+          <div class="validation-item ${result.status}">
+            <div class="validation-icon ${result.status}">${iconSymbol}</div>
+            <div class="validation-content">
+              <div class="validation-title">${result.title}</div>
+              <div class="validation-message">${result.message}</div>
+              ${result.detail ? `<div class="validation-message" style="margin-top: 4px;">${result.detail}</div>` : ''}
+              ${result.suggestion ? `
+                <div class="validation-suggestion">
+                  <strong>💡 Suggestion:</strong> ${result.suggestion}
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      validationResultsEl.innerHTML = html;
+    }
+
+    // Update compliance score display
+    function updateComplianceScore(validation) {
+      complianceScoreEl.textContent = validation.score;
+
+      const statusLabels = {
+        'excellent': 'Excellent ✓',
+        'good': 'Good',
+        'fair': 'Needs Attention',
+        'poor': 'Review Required'
+      };
+
+      complianceStatusEl.textContent = statusLabels[validation.status] || 'Unknown';
+    }
+
+    // Validate form
+    function validateForm() {
+      const formData = getFormData();
+      const validation = validator.validateFHR(formData);
+
+      updateComplianceScore(validation);
+      renderValidationResults(validation);
+      updateProgress();
+    }
+
+    // Add focus highlighting for missing required fields
+    function addFieldHighlighting() {
+      Object.keys(formInputs).forEach(fieldKey => {
+        const input = formInputs[fieldKey];
+
+        input.addEventListener('focus', () => {
+          // Remove all existing highlights
+          Object.values(formInputs).forEach(inp => {
+            inp.style.border = '';
+            inp.style.boxShadow = '';
+          });
+
+          // Check if this field is required and empty
+          const value = input.value;
+          const isEmpty = !value || value.trim() === '';
+
+          // Find if this field is in required list
+          let isRequired = false;
+          Object.values(fieldSections).forEach(section => {
+            section.fields.forEach(field => {
+              if (field.id === fieldKey && field.required && isEmpty) {
+                isRequired = true;
+              }
+            });
+          });
+
+          if (isRequired) {
+            input.style.border = '2px solid #FCA5A5';
+            input.style.boxShadow = '0 0 0 3px rgba(252, 165, 165, 0.2)';
+          }
+        });
+
+        input.addEventListener('blur', () => {
+          input.style.border = '';
+          input.style.boxShadow = '';
+        });
+      });
+    }
+
+    // Add event listeners to all inputs
+    Object.values(formInputs).forEach(input => {
+      input.addEventListener('input', validateForm);
+      input.addEventListener('change', validateForm);
+    });
+
+    // Enable field highlighting
+    addFieldHighlighting();
+
+    // Children visibility toggle
+    formInputs.hasChildren.addEventListener('change', () => {
+      const numChildrenGroup = document.getElementById('numChildrenGroup');
+      numChildrenGroup.style.display = formInputs.hasChildren.value === 'yes' ? 'block' : 'none';
+    });
+
+    // Focus field helper function
+    function focusField(fieldId) {
+      const field = formInputs[fieldId];
+      if (field) {
+        field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          field.focus();
+        }, 500);
+      }
+    }
+
+    // Check for missing fields
+    function getMissingFields() {
+      const data = getFormData();
+      const missing = [];
+
+      Object.values(fieldSections).forEach(section => {
+        section.fields.forEach(field => {
+          if (field.required) {
+            const value = data[field.id];
+            if (!value || value.toString().trim() === '') {
+              missing.push({
+                section: section.name,
+                field: field.label,
+                id: field.id
+              });
+            }
+          }
+        });
+      });
+
+      return missing;
+    }
+
+    // Submit button
+    submitBtn.addEventListener('click', () => {
+      const missingFields = getMissingFields();
+
+      if (missingFields.length > 0) {
+        let message = '⚠️ Cannot Submit - Missing Required Fields\n\n';
+        message += 'Please complete the following fields:\n\n';
+
+        missingFields.forEach((field, index) => {
+          message += `${index + 1}. ${field.section}: ${field.field}\n`;
+        });
+
+        message += '\n💡 Click on any field in the "Field Completion" panel to jump to it.';
+        alert(message);
+
+        // Focus first missing field
+        if (missingFields[0]) {
+          focusField(missingFields[0].id);
+        }
+        return;
+      }
+
+      const validation = validator.validateFHR(getFormData());
+      if (validation.score >= 75) {
+        alert('✅ Form Submitted Successfully!\n\nCompliance Score: ' + validation.score + '/100\n\nThis proposal has been sent to your supervisor for review. You will receive notification once approved.');
+      } else {
+        alert('⚠️ Compliance Score Too Low\n\nScore: ' + validation.score + '/100\n\nPlease address the compliance issues highlighted in the right panel before submitting for review.');
+      }
+    });
+
+    // AI Semantic Analysis for Justification
+    function analyzeJustification(text) {
+      const analysis = {
+        quality: 0,
+        issues: [],
+        suggestions: [],
+        strengths: []
+      };
+
+      // Check for risk appetite mention
+      const riskKeywords = ['risk appetite', 'risk tolerance', 'conservative', 'moderate', 'aggressive', 'risk-averse'];
+      const hasRiskMention = riskKeywords.some(keyword => text.toLowerCase().includes(keyword));
+
+      if (hasRiskMention) {
+        analysis.quality += 20;
+        analysis.strengths.push('✓ Risk appetite mentioned');
+      } else {
+        analysis.issues.push('Missing explicit risk appetite assessment');
+        analysis.suggestions.push('Add client\'s risk tolerance level (e.g., "Client has moderate risk appetite (6/10 scale)")');
+      }
+
+      // Check for investment horizon
+      const horizonKeywords = ['years', 'long-term', 'short-term', 'horizon', 'time frame'];
+      const hasHorizon = horizonKeywords.some(keyword => text.toLowerCase().includes(keyword));
+
+      if (hasHorizon) {
+        analysis.quality += 20;
+        analysis.strengths.push('✓ Investment horizon mentioned');
+      } else {
+        analysis.issues.push('Missing investment time horizon');
+        analysis.suggestions.push('Specify investment horizon (e.g., "Client plans to hold for 15-20 years until retirement")');
+      }
+
+      // Check for life stage alignment
+      const lifeStageKeywords = ['family', 'children', 'retirement', 'career', 'education', 'aged parent'];
+      const hasLifeStage = lifeStageKeywords.some(keyword => text.toLowerCase().includes(keyword));
+
+      if (hasLifeStage) {
+        analysis.quality += 20;
+        analysis.strengths.push('✓ Life stage context provided');
+      } else {
+        analysis.issues.push('Missing life stage alignment');
+        analysis.suggestions.push('Explain how recommendation fits client\'s life stage');
+      }
+
+      // Check for affordability mention
+      const affordKeywords = ['income', 'afford', 'premium', 'budget', 'financial capacity'];
+      const hasAfford = affordKeywords.some(keyword => text.toLowerCase().includes(keyword));
+
+      if (hasAfford) {
+        analysis.quality += 20;
+        analysis.strengths.push('✓ Affordability addressed');
+      } else {
+        analysis.issues.push('Missing affordability justification');
+        analysis.suggestions.push('Explain why premium is affordable for client\'s income level');
+      }
+
+      // Check for specific needs/goals
+      const needsKeywords = ['need', 'protection', 'goal', 'objective', 'priority', 'concern'];
+      const hasNeeds = needsKeywords.some(keyword => text.toLowerCase().includes(keyword));
+
+      if (hasNeeds) {
+        analysis.quality += 20;
+        analysis.strengths.push('✓ Client needs articulated');
+      } else {
+        analysis.issues.push('Missing specific client needs');
+        analysis.suggestions.push('State client\'s specific financial goals or protection needs');
+      }
+
+      // Check for contradictions
+      if (text.toLowerCase().includes('conservative') && text.toLowerCase().includes('high-risk')) {
+        analysis.issues.push('⚠️ CONTRADICTION: Text mentions both "conservative" and "high-risk"');
+        analysis.quality -= 10;
+      }
+
+      // Check length adequacy
+      if (text.length < 100) {
+        analysis.issues.push('Justification too brief (minimum 100 characters recommended)');
+        analysis.quality -= 10;
+      } else {
+        analysis.quality += 10;
+      }
+
+      // Word count check
+      const wordCount = text.trim().split(/\s+/).length;
+      if (wordCount < 30) {
+        analysis.issues.push('Word count low: ' + wordCount + ' words (minimum 30 recommended)');
+      } else {
+        analysis.strengths.push('✓ Adequate detail provided (' + wordCount + ' words)');
+      }
+
+      // Ensure quality is between 0-100
+      analysis.quality = Math.max(0, Math.min(100, analysis.quality));
+
+      return analysis;
+    }
+
+    function showAISuggestions() {
+      const text = formInputs.justification.value;
+      const analysis = analyzeJustification(text);
+
+      const qualityBadge = document.getElementById('qualityBadge');
+      qualityBadge.style.display = 'inline-flex';
+      qualityBadge.textContent = 'Quality: ' + analysis.quality + '%';
+
+      // Color code the badge
+      if (analysis.quality >= 80) {
+        qualityBadge.className = 'badge badge-success';
+      } else if (analysis.quality >= 60) {
+        qualityBadge.className = 'badge badge-warning';
+      } else {
+        qualityBadge.className = 'badge badge-error';
+      }
+
+      const panel = document.getElementById('aiAnalysisPanel');
+      panel.style.display = 'block';
+
+      let html = '<div style="background: white; border: 2px solid var(--gray-200); border-radius: var(--radius-lg); padding: var(--space-lg);">';
+      html += '<h4 style="margin-bottom: var(--space-md); color: var(--gray-900);">🤖 AI Semantic Analysis</h4>';
+
+      // Strengths
+      if (analysis.strengths.length > 0) {
+        html += '<div style="margin-bottom: var(--space-md);">';
+        html += '<strong style="color: #10B981;">Strengths:</strong>';
+        html += '<ul style="margin: var(--space-sm) 0 0 20px; color: var(--gray-700);">';
+        analysis.strengths.forEach(strength => {
+          html += '<li style="margin: 4px 0;">' + strength + '</li>';
+        });
+        html += '</ul></div>';
+      }
+
+      // Issues
+      if (analysis.issues.length > 0) {
+        html += '<div style="margin-bottom: var(--space-md);">';
+        html += '<strong style="color: #EF4444;">Issues Detected:</strong>';
+        html += '<ul style="margin: var(--space-sm) 0 0 20px; color: var(--gray-700);">';
+        analysis.issues.forEach(issue => {
+          html += '<li style="margin: 4px 0;">' + issue + '</li>';
+        });
+        html += '</ul></div>';
+      }
+
+      // Suggestions
+      if (analysis.suggestions.length > 0) {
+        html += '<div style="background: var(--info-bg); padding: var(--space-md); border-radius: var(--radius-md); border: 1px solid var(--info-border);">';
+        html += '<strong style="color: var(--info-text);">💡 AI Suggestions to Improve:</strong>';
+        html += '<ul style="margin: var(--space-sm) 0 0 20px; color: var(--gray-700);">';
+        analysis.suggestions.forEach(suggestion => {
+          html += '<li style="margin: 4px 0;">' + suggestion + '</li>';
+        });
+        html += '</ul></div>';
+      }
+
+      // Template button
+      if (analysis.quality < 80) {
+        html += '<div style="margin-top: var(--space-md);">';
+        html += '<button class="btn btn-secondary btn-sm" onclick="useTemplate()">Use AI Template</button>';
+        html += '</div>';
+      }
+
+      html += '</div>';
+      panel.innerHTML = html;
+    }
+
+    function useTemplate() {
+      const formData = getFormData();
+      const template = `Client ${formData.clientName || '[Name]'}, age ${formData.age || '[Age]'}, has expressed need for family protection with ${formData.numChildren || '0'} children. With monthly income of $${formData.monthlyIncome || '0'}, the proposed premium of $${formData.monthlyPremium || '0'}/month (${((parseFloat(formData.monthlyPremium) / parseFloat(formData.monthlyIncome)) * 100).toFixed(1)}% of income) is affordable and sustainable.
+
+Client demonstrates moderate risk appetite (assessed at 6/10 scale) and prioritizes protection over investment growth at this life stage. The ${formData.productType || 'term life'} product aligns with client's 15-20 year investment horizon and provides comprehensive coverage for death/TPD ($${formData.deathCoverage || '0'}) and critical illness ($${formData.ciCoverage || '0'}).
+
+Client acknowledges understanding of policy terms, premium obligations, and coverage scope. This recommendation meets MoneySense guidelines for life stage appropriateness and protection adequacy.`;
+
+      formInputs.justification.value = template;
+      showAISuggestions();
+      alert('✅ AI Template Applied!\n\nThe justification has been updated with a compliant template. Review and customize as needed.');
+    }
+
+    // Auto-analyze on blur
+    formInputs.justification.addEventListener('blur', () => {
+      const text = formInputs.justification.value;
+      if (text.length > 50) {
+        showAISuggestions();
+      }
+    });
+
+    // Load FHR data if ID is present
+    function loadFHRData() {
+      if (fhrId && fhrDatabase[fhrId]) {
+        const data = fhrDatabase[fhrId];
+
+        // Populate form fields
+        formInputs.clientName.value = data.clientName || '';
+        formInputs.age.value = data.age || '';
+        formInputs.monthlyIncome.value = data.monthlyIncome || '';
+        formInputs.monthlyExpenses.value = data.monthlyExpenses || '';
+        formInputs.emergencyFund.value = data.emergencyFund || '';
+        formInputs.retirementSavings.value = data.retirementSavings || '';
+        formInputs.hasChildren.value = data.hasChildren || 'no';
+        formInputs.numChildren.value = data.numChildren || 0;
+        formInputs.productType.value = data.productType || 'term-life';
+        formInputs.monthlyPremium.value = data.monthlyPremium || '';
+        formInputs.deathCoverage.value = data.deathCoverage || '';
+        formInputs.ciCoverage.value = data.ciCoverage || '';
+        formInputs.policyTerm.value = data.policyTerm || '';
+        formInputs.justification.value = data.justification || '';
+
+        // Show/hide children group
+        const numChildrenGroup = document.getElementById('numChildrenGroup');
+        numChildrenGroup.style.display = data.hasChildren === 'yes' ? 'block' : 'none';
+
+        // Force validation after a small delay to ensure DOM is updated
+        setTimeout(() => {
+          validateForm();
+        }, 100);
+      } else if (isNewForm) {
+        // Clear form for new FHR
+        Object.values(formInputs).forEach(input => {
+          if (input.tagName === 'INPUT' || input.tagName === 'TEXTAREA') {
+            input.value = '';
+          } else if (input.tagName === 'SELECT') {
+            input.selectedIndex = 0;
+          }
+        });
+      } else {
+        // If no ID and not new form, still run validation
+        validateForm();
+      }
+    }
+
+    // Load data on page load - wrapped in DOMContentLoaded to ensure validator is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadFHRData);
+    } else {
+      loadFHRData();
+    }
+  </script>
+</body>
+</html>

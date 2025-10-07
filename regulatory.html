@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Regulatory Intelligence Hub - CompliSense AI</title>
+
+  <link rel="stylesheet" href="styles/aia-theme.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <style>
+    .regulatory-container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: var(--space-xl);
+    }
+
+    .status-banner {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      color: white;
+      padding: var(--space-xl);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-xl);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .status-info h2 {
+      margin: 0 0 var(--space-sm) 0;
+      font-size: var(--font-size-3xl);
+    }
+
+    .status-info p {
+      margin: 0;
+      opacity: 0.9;
+    }
+
+    .sync-status {
+      text-align: center;
+      padding: var(--space-lg);
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius-md);
+    }
+
+    .sync-status-icon {
+      font-size: 36px;
+      margin-bottom: var(--space-sm);
+    }
+
+    .updates-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: var(--space-xl);
+      margin-bottom: var(--space-xl);
+    }
+
+    .update-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      margin-bottom: var(--space-lg);
+      border-left: 4px solid var(--aia-red);
+    }
+
+    .update-card.critical {
+      border-left-color: #EF4444;
+      background: #FEF2F2;
+    }
+
+    .update-card.important {
+      border-left-color: #F59E0B;
+      background: #FFFBEB;
+    }
+
+    .update-card.info {
+      border-left-color: #3B82F6;
+      background: #EFF6FF;
+    }
+
+    .update-header {
+      padding: var(--space-lg);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .update-title {
+      flex: 1;
+    }
+
+    .update-title h3 {
+      margin: 0 0 var(--space-sm) 0;
+      color: var(--gray-900);
+    }
+
+    .update-meta {
+      display: flex;
+      gap: var(--space-md);
+      font-size: var(--font-size-sm);
+      color: var(--gray-600);
+    }
+
+    .update-priority {
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+    }
+
+    .priority-critical {
+      background: #FEE2E2;
+      color: #991B1B;
+    }
+
+    .priority-important {
+      background: #FEF3C7;
+      color: #92400E;
+    }
+
+    .priority-info {
+      background: #DBEAFE;
+      color: #1E40AF;
+    }
+
+    .update-body {
+      padding: var(--space-lg);
+    }
+
+    .update-summary {
+      color: var(--gray-700);
+      line-height: 1.8;
+      margin-bottom: var(--space-lg);
+    }
+
+    .impact-section {
+      background: var(--gray-50);
+      padding: var(--space-md);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-lg);
+    }
+
+    .impact-section h4 {
+      font-size: var(--font-size-sm);
+      color: var(--gray-700);
+      margin-bottom: var(--space-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .impact-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .impact-list li {
+      padding: var(--space-sm) 0;
+      color: var(--gray-700);
+      font-size: var(--font-size-sm);
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+    }
+
+    .impact-list li::before {
+      content: "•";
+      color: var(--aia-red);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .action-required {
+      background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+      border: 2px solid #F59E0B;
+      padding: var(--space-md);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-lg);
+    }
+
+    .action-required h4 {
+      color: #92400E;
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .update-footer {
+      padding: var(--space-lg);
+      background: var(--gray-50);
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .blockchain-verify {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: var(--font-size-sm);
+      color: var(--gray-600);
+    }
+
+    .blockchain-hash {
+      font-family: monospace;
+      background: white;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-xs);
+    }
+
+    .sidebar-widget {
+      background: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      padding: var(--space-lg);
+      margin-bottom: var(--space-lg);
+    }
+
+    .widget-title {
+      font-weight: 600;
+      margin-bottom: var(--space-md);
+      color: var(--gray-900);
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: var(--space-lg);
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--gray-200);
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-bottom: var(--space-lg);
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -22px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--aia-red);
+      border: 2px solid white;
+      box-shadow: 0 0 0 2px var(--aia-red);
+    }
+
+    .timeline-date {
+      font-size: var(--font-size-xs);
+      color: var(--gray-500);
+      margin-bottom: 4px;
+    }
+
+    .timeline-content {
+      font-size: var(--font-size-sm);
+      color: var(--gray-700);
+      line-height: 1.6;
+    }
+
+    .compliance-score-widget {
+      background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+      padding: var(--space-xl);
+      border-radius: var(--radius-lg);
+      text-align: center;
+    }
+
+    .compliance-score-widget h3 {
+      color: #4338CA;
+      margin-bottom: var(--space-md);
+    }
+
+    .compliance-percentage {
+      font-size: 48px;
+      font-weight: 700;
+      color: #4338CA;
+      line-height: 1;
+    }
+
+    .mas-logo {
+      width: 120px;
+      height: 60px;
+      background: var(--gray-100);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: var(--space-lg) auto;
+      font-weight: 700;
+      color: var(--gray-600);
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span style="font-size: 28px;">🧠</span>
+      <span>CompliSense AI</span>
+    </a>
+    <ul class="navbar-menu">
+      <li><a href="index.html">FHR Form</a></li>
+      <li><a href="products.html">Products</a></li>
+      <li><a href="portfolio.html">Portfolio</a></li>
+      <li class="nav-dropdown">
+        <span class="nav-dropdown-toggle">AI Tools ▾</span>
+        <div class="nav-dropdown-menu">
+          <a href="copilot.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">💬</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">AI Copilot</div>
+              <div class="nav-dropdown-item-desc">Chat compliance assistant</div>
+            </div>
+          </a>
+          <a href="analytics.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">📈</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Performance Analytics</div>
+              <div class="nav-dropdown-item-desc">Track metrics & anomalies</div>
+            </div>
+          </a>
+          <a href="graph.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">🕸️</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Compliance Graph</div>
+              <div class="nav-dropdown-item-desc">Visualize relationships</div>
+            </div>
+          </a>
+          <a href="documents.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">📄</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Document Intelligence</div>
+              <div class="nav-dropdown-item-desc">OCR & extraction</div>
+            </div>
+          </a>
+          <a href="regulatory.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">🔔</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Regulatory Updates</div>
+              <div class="nav-dropdown-item-desc">Latest MAS notices</div>
+            </div>
+          </a>
+        </div>
+      </li>
+      <li><a href="supervisor.html">Supervisor</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <span class="text-gray">Agent: <strong>MAHADEVAN KARTIK</strong></span>
+      
+    </div>
+  </nav>
+
+  <!-- Regulatory Container -->
+  <div class="regulatory-container">
+    <!-- Status Banner -->
+    <div class="status-banner">
+      <div class="status-info">
+        <h2>📡 Regulatory Intelligence Hub</h2>
+        <p>Automated monitoring of MAS notices, AIA policy updates, and industry compliance changes</p>
+      </div>
+      <div class="sync-status">
+        <div class="sync-status-icon">✅</div>
+        <div style="font-weight: 600;">System Up-to-Date</div>
+        <div style="font-size: var(--font-size-sm); opacity: 0.9; margin-top: 4px;">
+          Last synced: 2 minutes ago
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="updates-grid">
+      <!-- Left Column: Recent Updates -->
+      <div>
+        <div class="section-header">
+          <h2 class="section-title">📋 Recent Regulatory Updates</h2>
+          <div class="section-actions">
+            <button class="btn btn-ghost">Filter</button>
+            <button class="btn btn-ghost">Export All</button>
+          </div>
+        </div>
+
+        <!-- Update 1: Critical -->
+        <div class="update-card critical">
+          <div class="update-header">
+            <div class="update-title">
+              <h3>🚨 MAS Notice 302-A: Enhanced ILP Disclosure Requirements</h3>
+              <div class="update-meta">
+                <span>📅 Issued: 10-Dec-2025</span>
+                <span>🎯 Effective: 1-Mar-2026</span>
+                <span>📂 Source: MAS</span>
+              </div>
+            </div>
+            <span class="update-priority priority-critical">CRITICAL</span>
+          </div>
+
+          <div class="update-body">
+            <div class="update-summary">
+              <strong>Summary:</strong> All Investment-Linked Policy (ILP) proposals must now include a mandatory 5-year cost projection comparing projected vs guaranteed values, including effect of non-guaranteed bonuses and investment performance scenarios (pessimistic, expected, optimistic).
+            </div>
+
+            <div class="action-required">
+              <h4>⚠️ Action Required Before 1-Mar-2026</h4>
+              <ul class="impact-list">
+                <li>Update all ILP proposal templates to include 5-year projections</li>
+                <li>Train agents on new disclosure requirements (Module 15)</li>
+                <li>CompliSense AI validation rules updated automatically</li>
+                <li>Ensure client signature on new disclosure form FRM-302A</li>
+              </ul>
+            </div>
+
+            <div class="impact-section">
+              <h4>🎯 Impacted Products (23 Products)</h4>
+              <ul class="impact-list">
+                <li>AIA Wealth Maximize ILP Series (6 variants)</li>
+                <li>AIA Investment Prime (4 variants)</li>
+                <li>AIA Future Builder ILP (8 variants)</li>
+                <li>AIA Global Portfolio Series (5 variants)</li>
+              </ul>
+            </div>
+
+            <div class="impact-section">
+              <h4>💡 CompliSense AI Auto-Actions Taken</h4>
+              <ul class="impact-list">
+                <li>✅ Validation rules updated to enforce FRM-302A attachment</li>
+                <li>✅ ILP product templates updated with 5-year projection fields</li>
+                <li>✅ Agents will see warning if ILP proposed without projections</li>
+                <li>✅ Compliance checklist updated in FHR form Section 5</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="update-footer">
+            <div class="blockchain-verify">
+              <span>🔗 Blockchain Verified</span>
+              <span class="blockchain-hash">0xA7F3...92E1</span>
+            </div>
+            <div style="display: flex; gap: var(--space-sm);">
+              <button class="btn btn-ghost" onclick="alert('This would open the full MAS Notice 302-A document in a new window with highlighted sections relevant to AIA products.')">
+                View Full Notice
+              </button>
+              <button class="btn btn-primary" onclick="alert('Mark as Acknowledged\n\nYou confirm that you have:\n✓ Read and understood MAS Notice 302-A\n✓ Aware of 1-Mar-2026 effective date\n✓ Will complete required training before deadline\n\nThis acknowledgment will be logged in your compliance record.')">
+                Acknowledge
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Update 2: Important -->
+        <div class="update-card important">
+          <div class="update-header">
+            <div class="update-title">
+              <h3>📢 AIA Policy Update: Premium Affordability Guidelines</h3>
+              <div class="update-meta">
+                <span>📅 Issued: 5-Dec-2025</span>
+                <span>🎯 Effective: Immediately</span>
+                <span>📂 Source: AIA Singapore</span>
+              </div>
+            </div>
+            <span class="update-priority priority-important">IMPORTANT</span>
+          </div>
+
+          <div class="update-body">
+            <div class="update-summary">
+              <strong>Summary:</strong> AIA is strengthening internal premium affordability checks beyond MoneySense 15% guideline. For clients with monthly income below $3,000, maximum premium ratio reduced to 12% to reduce lapse risk.
+            </div>
+
+            <div class="impact-section">
+              <h4>🎯 Impact on Your Proposals</h4>
+              <ul class="impact-list">
+                <li>Clients earning <$3,000/month: Max 12% premium ratio (was 15%)</li>
+                <li>Clients with irregular income: Must average 12 months, not 3 months</li>
+                <li>Self-employed clients: Require tax returns for income verification</li>
+              </ul>
+            </div>
+
+            <div class="impact-section">
+              <h4>💡 CompliSense AI Auto-Actions Taken</h4>
+              <ul class="impact-list">
+                <li>✅ Affordability calculator updated with tiered thresholds</li>
+                <li>✅ Validation triggers warning if income <$3,000 and premium >12%</li>
+                <li>✅ Historical proposals re-scored (3 of your proposals flagged)</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="update-footer">
+            <div class="blockchain-verify">
+              <span>🔗 Blockchain Verified</span>
+              <span class="blockchain-hash">0xB2C9...47A3</span>
+            </div>
+            <div style="display: flex; gap: var(--space-sm);">
+              <button class="btn btn-ghost">View Full Policy</button>
+              <button class="btn btn-primary" onclick="alert('Acknowledged!')">Acknowledge</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Update 3: Info -->
+        <div class="update-card info">
+          <div class="update-header">
+            <div class="update-title">
+              <h3>ℹ️ MoneySense Update: Life Stage Guidelines Refreshed</h3>
+              <div class="update-meta">
+                <span>📅 Issued: 1-Dec-2025</span>
+                <span>🎯 Effective: Informational</span>
+                <span>📂 Source: MoneySense.gov.sg</span>
+              </div>
+            </div>
+            <span class="update-priority priority-info">INFO</span>
+          </div>
+
+          <div class="update-body">
+            <div class="update-summary">
+              <strong>Summary:</strong> MoneySense has published updated financial planning guides for all life stages with refreshed case studies and calculators. No regulatory changes, but best practice recommendations updated.
+            </div>
+
+            <div class="impact-section">
+              <h4>📚 Updated Resources</h4>
+              <ul class="impact-list">
+                <li>Fresh Entrants Guide: New section on gig economy workers</li>
+                <li>Starting Family: Updated education cost estimates (2025-2040)</li>
+                <li>Pre-Retirees: New CPF LIFE optimization strategies</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="update-footer">
+            <div class="blockchain-verify">
+              <span>🔗 Blockchain Verified</span>
+              <span class="blockchain-hash">0xC8D4...15F7</span>
+            </div>
+            <div>
+              <button class="btn btn-ghost" onclick="window.open('https://www.moneysense.gov.sg', '_blank')">
+                Visit MoneySense
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Sidebar Widgets -->
+      <div>
+        <!-- Compliance Status -->
+        <div class="compliance-score-widget">
+          <h3>System Compliance Status</h3>
+          <div class="compliance-percentage">100%</div>
+          <p style="margin-top: var(--space-sm); color: #4338CA; font-size: var(--font-size-sm);">
+            All rules up-to-date with latest regulations
+          </p>
+          <div class="mas-logo">MAS + AIA</div>
+          <p style="font-size: var(--font-size-xs); color: #6366F1; margin: 0;">
+            Last validation: 15-Dec-2025 14:35 SGT
+          </p>
+        </div>
+
+        <!-- Monitoring Sources -->
+        <div class="sidebar-widget">
+          <div class="widget-title">📡 Monitoring Sources</div>
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            <li style="padding: var(--space-sm) 0; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: var(--font-size-sm); color: var(--gray-700);">MAS Website</span>
+              <span class="badge badge-success">Active</span>
+            </li>
+            <li style="padding: var(--space-sm) 0; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: var(--font-size-sm); color: var(--gray-700);">MAS Notices RSS</span>
+              <span class="badge badge-success">Active</span>
+            </li>
+            <li style="padding: var(--space-sm) 0; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: var(--font-size-sm); color: var(--gray-700);">AIA Policy Portal</span>
+              <span class="badge badge-success">Active</span>
+            </li>
+            <li style="padding: var(--space-sm) 0; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: var(--font-size-sm); color: var(--gray-700);">Industry Forums</span>
+              <span class="badge badge-success">Active</span>
+            </li>
+            <li style="padding: var(--space-sm) 0; display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: var(--font-size-sm); color: var(--gray-700);">LIA Singapore</span>
+              <span class="badge badge-success">Active</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Update Timeline -->
+        <div class="sidebar-widget">
+          <div class="widget-title">📅 Recent Activity</div>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-date">2 minutes ago</div>
+              <div class="timeline-content">
+                System synchronized with MAS website
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-date">2 hours ago</div>
+              <div class="timeline-content">
+                AIA premium guidelines updated
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-date">Yesterday</div>
+              <div class="timeline-content">
+                MoneySense guides refreshed
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-date">5 days ago</div>
+              <div class="timeline-content">
+                MAS Notice 302-A published
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="sidebar-widget">
+          <div class="widget-title">📊 Statistics (Last 30 Days)</div>
+          <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: var(--font-size-sm); color: var(--gray-600);">Updates Detected</span>
+              <span style="font-weight: 700; color: var(--gray-900);">18</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: var(--font-size-sm); color: var(--gray-600);">Auto-Applied Rules</span>
+              <span style="font-weight: 700; color: var(--gray-900);">12</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: var(--font-size-sm); color: var(--gray-600);">Agent Notifications</span>
+              <span style="font-weight: 700; color: var(--gray-900);">247</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: var(--font-size-sm); color: var(--gray-600);">Avg Response Time</span>
+              <span style="font-weight: 700; color: var(--gray-900);">< 2 hours</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Floating Chat Widget -->
+  <div class="chat-widget">
+    <button class="chat-widget-button" onclick="window.location.href='copilot.html'" title="Ask AI Copilot">
+      💬
+    </button>
+    <div class="chat-widget-tooltip">Ask AI Copilot</div>
+  </div>
+
+</body>
+</html>

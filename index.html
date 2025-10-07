@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>CompliSense AI - My FHR Forms</title>
+
+  <link rel="stylesheet" href="styles/aia-theme.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <style>
+    .dashboard-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: var(--space-xl);
+    }
+
+    .page-header {
+      margin-bottom: var(--space-2xl);
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: var(--space-lg);
+      margin-bottom: var(--space-2xl);
+    }
+
+    .stat-box {
+      background: white;
+      padding: var(--space-lg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      border-left: 4px solid var(--gray-300);
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+
+    .stat-box:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .stat-box.draft { border-left-color: #6B7280; }
+    .stat-box.in-progress { border-left-color: #3B82F6; }
+    .stat-box.pending { border-left-color: #F59E0B; }
+    .stat-box.approved { border-left-color: #10B981; }
+    .stat-box.rejected { border-left-color: #EF4444; }
+
+    .stat-number {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: var(--space-xs);
+    }
+
+    .stat-label {
+      font-size: var(--font-size-sm);
+      color: var(--gray-600);
+    }
+
+    .fhr-table {
+      background: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .table-header {
+      background: var(--gray-50);
+      padding: var(--space-lg);
+      border-bottom: 2px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .table-filters {
+      display: flex;
+      gap: var(--space-md);
+      align-items: center;
+    }
+
+    .fhr-row {
+      padding: var(--space-lg);
+      border-bottom: 1px solid var(--gray-200);
+      display: grid;
+      grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 120px;
+      gap: var(--space-lg);
+      align-items: center;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+
+    .fhr-row:hover {
+      background: var(--gray-50);
+    }
+
+    .fhr-row:last-child {
+      border-bottom: none;
+    }
+
+    .client-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .client-name {
+      font-weight: 600;
+      color: var(--gray-900);
+      font-size: var(--font-size-base);
+    }
+
+    .client-meta {
+      font-size: var(--font-size-xs);
+      color: var(--gray-500);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+    }
+
+    .status-badge.draft {
+      background: #F3F4F6;
+      color: #6B7280;
+    }
+
+    .status-badge.in-progress {
+      background: #DBEAFE;
+      color: #1E40AF;
+    }
+
+    .status-badge.pending {
+      background: var(--warning-bg);
+      color: var(--warning-text);
+    }
+
+    .status-badge.approved {
+      background: var(--success-bg);
+      color: var(--success-text);
+    }
+
+    .status-badge.rejected {
+      background: var(--error-bg);
+      color: var(--error-text);
+    }
+
+    .compliance-mini {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .score-mini {
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .score-mini.high { color: #10B981; }
+    .score-mini.medium { color: #F59E0B; }
+    .score-mini.low { color: #EF4444; }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span style="font-size: 28px;">🧠</span>
+      <span>CompliSense AI</span>
+    </a>
+    <ul class="navbar-menu">
+      <li><a href="index.html" class="active">FHR Forms</a></li>
+      <li><a href="products.html">Products</a></li>
+      <li><a href="portfolio.html">Portfolio</a></li>
+      <li class="nav-dropdown">
+        <span class="nav-dropdown-toggle">AI Tools ▾</span>
+        <div class="nav-dropdown-menu">
+          <a href="copilot.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">💬</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">AI Copilot</div>
+              <div class="nav-dropdown-item-desc">Chat compliance assistant</div>
+            </div>
+          </a>
+          <a href="analytics.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">📈</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Performance Analytics</div>
+              <div class="nav-dropdown-item-desc">Track metrics & anomalies</div>
+            </div>
+          </a>
+          <a href="graph.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">🕸️</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Compliance Graph</div>
+              <div class="nav-dropdown-item-desc">Visualize relationships</div>
+            </div>
+          </a>
+          <a href="documents.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">📄</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Document Intelligence</div>
+              <div class="nav-dropdown-item-desc">OCR & extraction</div>
+            </div>
+          </a>
+          <a href="regulatory.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">🔔</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Regulatory Updates</div>
+              <div class="nav-dropdown-item-desc">Latest MAS notices</div>
+            </div>
+          </a>
+        </div>
+      </li>
+      <li><a href="supervisor.html">Supervisor</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <span class="text-gray">Agent: <strong>MAHADEVAN KARTIK</strong></span>
+      
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="dashboard-container">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1 style="font-size: 32px; margin-bottom: var(--space-sm);">📋 My FHR Forms</h1>
+      <p style="color: var(--gray-600);">Manage all your Financial Health Review forms in one place</p>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <div class="stat-box draft" onclick="filterByStatus('draft')">
+        <div class="stat-number">8</div>
+        <div class="stat-label">Draft</div>
+      </div>
+      <div class="stat-box in-progress" onclick="filterByStatus('in-progress')">
+        <div class="stat-number">12</div>
+        <div class="stat-label">In Progress</div>
+      </div>
+      <div class="stat-box pending" onclick="filterByStatus('pending')">
+        <div class="stat-number">5</div>
+        <div class="stat-label">Pending Review</div>
+      </div>
+      <div class="stat-box approved" onclick="filterByStatus('approved')">
+        <div class="stat-number">34</div>
+        <div class="stat-label">Approved</div>
+      </div>
+      <div class="stat-box rejected" onclick="filterByStatus('rejected')">
+        <div class="stat-number">2</div>
+        <div class="stat-label">Rejected</div>
+      </div>
+    </div>
+
+    <!-- FHR Table -->
+    <div class="fhr-table">
+      <div class="table-header">
+        <h3 style="margin: 0; font-size: 18px;">All Forms (61)</h3>
+        <div class="table-filters">
+          <select class="form-select" id="statusFilter" style="width: 150px;">
+            <option value="all">All Status</option>
+            <option value="draft">Draft</option>
+            <option value="in-progress">In Progress</option>
+            <option value="pending">Pending Review</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <input type="text" class="form-input" id="searchInput" placeholder="Search client..." style="width: 200px;">
+          <button class="btn btn-primary" onclick="window.location.href='fhr-form.html?new=true'">
+            ➕ New FHR Form
+          </button>
+        </div>
+      </div>
+
+      <!-- Table Rows -->
+      <div id="fhrRows">
+        <!-- Will be populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Chat Widget -->
+  <div class="chat-widget">
+    <button class="chat-widget-button" onclick="window.location.href='copilot.html'" title="Ask AI Copilot">
+      💬
+    </button>
+    <div class="chat-widget-tooltip">Ask AI Copilot</div>
+  </div>
+
+  <script>
+    // Sample FHR data
+    const fhrForms = [
+      {
+        id: 'FHR-2025-001',
+        clientName: 'Tan Wei Ming',
+        age: 35,
+        nric: 'S8912345A',
+        status: 'in-progress',
+        complianceScore: 67,
+        lastModified: '2025-12-15 10:30',
+        product: 'Term Life',
+        premium: 800
+      },
+      {
+        id: 'FHR-2025-002',
+        clientName: 'Lim Siew Hoon',
+        age: 42,
+        nric: 'S7823456B',
+        status: 'approved',
+        complianceScore: 92,
+        lastModified: '2025-12-14 15:20',
+        product: 'Whole Life + CI',
+        premium: 1200
+      },
+      {
+        id: 'FHR-2025-003',
+        clientName: 'Chen Xiao Ming',
+        age: 28,
+        nric: 'S9234567C',
+        status: 'approved',
+        complianceScore: 95,
+        lastModified: '2025-12-14 09:15',
+        product: 'Term Life',
+        premium: 550
+      },
+      {
+        id: 'FHR-2025-004',
+        clientName: 'Kumar Rajesh',
+        age: 58,
+        nric: 'S6745678D',
+        status: 'rejected',
+        complianceScore: 52,
+        lastModified: '2025-12-13 14:45',
+        product: 'ILP',
+        premium: 1500
+      },
+      {
+        id: 'FHR-2025-005',
+        clientName: 'Wong Mei Ling',
+        age: 33,
+        nric: 'S8856789E',
+        status: 'pending',
+        complianceScore: 78,
+        lastModified: '2025-12-15 08:00',
+        product: 'Savings Plan',
+        premium: 600
+      },
+      {
+        id: 'FHR-2025-006',
+        clientName: 'David Ng Wei Jie',
+        age: 45,
+        nric: 'S7967890F',
+        status: 'in-progress',
+        complianceScore: 85,
+        lastModified: '2025-12-15 11:20',
+        product: 'Term Life + CI',
+        premium: 980
+      },
+      {
+        id: 'FHR-2025-007',
+        clientName: 'Sarah Tan Hui Min',
+        age: 29,
+        nric: 'S9278901G',
+        status: 'draft',
+        complianceScore: null,
+        lastModified: '2025-12-15 07:30',
+        product: 'Not selected',
+        premium: null
+      },
+      {
+        id: 'FHR-2025-008',
+        clientName: 'John Lim Kah Seng',
+        age: 52,
+        nric: 'S6889012H',
+        status: 'pending',
+        complianceScore: 88,
+        lastModified: '2025-12-14 16:45',
+        product: 'Whole Life',
+        premium: 1100
+      },
+      {
+        id: 'FHR-2025-009',
+        clientName: 'Fatimah Binte Hassan',
+        age: 38,
+        nric: 'S8190123I',
+        status: 'approved',
+        complianceScore: 93,
+        lastModified: '2025-12-13 13:20',
+        product: 'Term Life',
+        premium: 720
+      },
+      {
+        id: 'FHR-2025-010',
+        clientName: 'Michael Ong Wei Liang',
+        age: 41,
+        nric: 'S7801234J',
+        status: 'in-progress',
+        complianceScore: 72,
+        lastModified: '2025-12-15 09:45',
+        product: 'Critical Illness',
+        premium: 850
+      },
+      {
+        id: 'FHR-2025-011',
+        clientName: 'Priya Devi',
+        age: 31,
+        nric: 'S9012345K',
+        status: 'draft',
+        complianceScore: null,
+        lastModified: '2025-12-15 06:15',
+        product: 'Not selected',
+        premium: null
+      },
+      {
+        id: 'FHR-2025-012',
+        clientName: 'Ahmad Bin Rahman',
+        age: 48,
+        nric: 'S7323456L',
+        status: 'approved',
+        complianceScore: 90,
+        lastModified: '2025-12-12 10:30',
+        product: 'Whole Life',
+        premium: 1300
+      }
+    ];
+
+    function renderFHRRows(forms = fhrForms) {
+      const container = document.getElementById('fhrRows');
+      container.innerHTML = '';
+
+      forms.forEach(form => {
+        const row = document.createElement('div');
+        row.className = 'fhr-row';
+        row.onclick = () => openFHR(form.id);
+
+        let statusHTML = '';
+        let statusClass = form.status;
+        let statusText = form.status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+
+        if (form.status === 'draft') {
+          statusText = '📝 Draft';
+        } else if (form.status === 'in-progress') {
+          statusText = '⏳ In Progress';
+        } else if (form.status === 'pending') {
+          statusText = '⏱️ Pending Review';
+        } else if (form.status === 'approved') {
+          statusText = '✅ Approved';
+        } else if (form.status === 'rejected') {
+          statusText = '❌ Rejected';
+        }
+
+        let complianceHTML = '';
+        if (form.complianceScore !== null) {
+          let scoreClass = form.complianceScore >= 85 ? 'high' : form.complianceScore >= 70 ? 'medium' : 'low';
+          complianceHTML = `
+            <div class="compliance-mini">
+              <span class="score-mini ${scoreClass}">${form.complianceScore}</span>
+              <span style="font-size: var(--font-size-xs); color: var(--gray-500);">/100</span>
+            </div>
+          `;
+        } else {
+          complianceHTML = '<span style="color: var(--gray-400); font-size: var(--font-size-sm);">Not calculated</span>';
+        }
+
+        row.innerHTML = `
+          <div class="client-info">
+            <div class="client-name">${form.clientName}</div>
+            <div class="client-meta">${form.nric} • Age ${form.age} • ${form.id}</div>
+          </div>
+          <div>
+            <div style="font-weight: 600; color: var(--gray-800); margin-bottom: 2px;">${form.product}</div>
+            <div style="font-size: var(--font-size-xs); color: var(--gray-500);">
+              ${form.premium ? '$' + form.premium + '/month' : 'Premium not set'}
+            </div>
+          </div>
+          <div>
+            <span class="status-badge ${statusClass}">${statusText}</span>
+          </div>
+          <div>
+            ${complianceHTML}
+          </div>
+          <div style="font-size: var(--font-size-xs); color: var(--gray-600);">
+            ${form.lastModified}
+          </div>
+          <div>
+            <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); openFHR('${form.id}')">
+              Open
+            </button>
+          </div>
+        `;
+
+        container.appendChild(row);
+      });
+    }
+
+    function openFHR(id) {
+      window.location.href = `fhr-form.html?id=${id}`;
+    }
+
+    function filterByStatus(status) {
+      const filtered = status === 'all' ? fhrForms : fhrForms.filter(f => f.status === status);
+      renderFHRRows(filtered);
+      document.getElementById('statusFilter').value = status;
+    }
+
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      const filtered = fhrForms.filter(f =>
+        f.clientName.toLowerCase().includes(searchTerm) ||
+        f.nric.toLowerCase().includes(searchTerm) ||
+        f.id.toLowerCase().includes(searchTerm)
+      );
+      renderFHRRows(filtered);
+    });
+
+    // Status filter dropdown
+    document.getElementById('statusFilter').addEventListener('change', (e) => {
+      filterByStatus(e.target.value);
+    });
+
+    // Initial render
+    renderFHRRows();
+  </script>
+</body>
+</html>

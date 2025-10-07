@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>CompliSense AI - Client Portfolio</title>
+
+  <link rel="stylesheet" href="styles/aia-theme.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <style>
+    .portfolio-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: var(--space-xl);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-lg);
+      margin-bottom: var(--space-2xl);
+    }
+
+    .stat-card {
+      background: white;
+      padding: var(--space-lg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      border-left: 4px solid var(--aia-red);
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: var(--space-xs);
+    }
+
+    .stat-label {
+      font-size: var(--font-size-sm);
+      color: var(--gray-600);
+      margin-bottom: var(--space-sm);
+    }
+
+    .stat-change {
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+    }
+
+    .stat-change.positive {
+      color: var(--success-text);
+    }
+
+    .stat-change.negative {
+      color: var(--error-text);
+    }
+
+    .filters-bar {
+      background: white;
+      padding: var(--space-lg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: var(--space-lg);
+      display: flex;
+      gap: var(--space-md);
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: var(--space-sm);
+      align-items: center;
+    }
+
+    .filter-label {
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      color: var(--gray-700);
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 300px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 40px 10px 16px;
+      border: 2px solid var(--gray-300);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--aia-red);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      color: var(--gray-400);
+    }
+
+    .client-table {
+      background: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .table-header {
+      background: var(--gray-50);
+      padding: var(--space-md) var(--space-lg);
+      border-bottom: 2px solid var(--gray-200);
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 120px;
+      gap: var(--space-md);
+      font-weight: 600;
+      font-size: var(--font-size-sm);
+      color: var(--gray-700);
+    }
+
+    .table-row {
+      padding: var(--space-md) var(--space-lg);
+      border-bottom: 1px solid var(--gray-200);
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 120px;
+      gap: var(--space-md);
+      align-items: center;
+      transition: background-color 0.2s;
+      cursor: pointer;
+    }
+
+    .table-row:hover {
+      background-color: var(--gray-50);
+    }
+
+    .client-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .client-name {
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    .client-meta {
+      font-size: var(--font-size-xs);
+      color: var(--gray-500);
+    }
+
+    .policy-count {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      background: var(--gray-100);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+    }
+
+    .compliance-score-mini {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .score-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .score-circle.excellent {
+      background: var(--success-bg);
+      color: var(--success-text);
+      border: 2px solid var(--success-border);
+    }
+
+    .score-circle.good {
+      background: #DBEAFE;
+      color: #1E40AF;
+      border: 2px solid #93C5FD;
+    }
+
+    .score-circle.warning {
+      background: var(--warning-bg);
+      color: var(--warning-text);
+      border: 2px solid var(--warning-border);
+    }
+
+    .score-circle.poor {
+      background: var(--error-bg);
+      color: var(--error-text);
+      border: 2px solid var(--error-border);
+    }
+
+    .issue-chips {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .issue-chip {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .issue-chip.critical {
+      background: var(--error-bg);
+      color: var(--error-text);
+    }
+
+    .issue-chip.warning {
+      background: var(--warning-bg);
+      color: var(--warning-text);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      padding: var(--space-xl);
+      overflow-y: auto;
+    }
+
+    .modal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: var(--radius-lg);
+      max-width: 900px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal-header {
+      padding: var(--space-xl);
+      border-bottom: 2px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-body {
+      padding: var(--space-xl);
+    }
+
+    .policy-card {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      margin-bottom: var(--space-md);
+    }
+
+    .policy-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: var(--space-md);
+    }
+
+    .policy-details {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-md);
+      margin-bottom: var(--space-md);
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .detail-label {
+      font-size: var(--font-size-xs);
+      color: var(--gray-500);
+      font-weight: 600;
+    }
+
+    .detail-value {
+      font-size: var(--font-size-sm);
+      color: var(--gray-900);
+      font-weight: 600;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--gray-500);
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+
+    .close-btn:hover {
+      background: var(--gray-100);
+      color: var(--gray-900);
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span style="font-size: 28px;">🧠</span>
+      <span>CompliSense AI</span>
+    </a>
+    <ul class="navbar-menu">
+      <li><a href="index.html">FHR Form</a></li>
+      <li><a href="products.html">Products</a></li>
+      <li><a href="portfolio.html" class="active">Portfolio</a></li>
+      <li class="nav-dropdown">
+        <span class="nav-dropdown-toggle">AI Tools ▾</span>
+        <div class="nav-dropdown-menu">
+          <a href="copilot.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">💬</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">AI Copilot</div>
+              <div class="nav-dropdown-item-desc">Chat compliance assistant</div>
+            </div>
+          </a>
+          <a href="analytics.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">📈</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Performance Analytics</div>
+              <div class="nav-dropdown-item-desc">Track metrics & anomalies</div>
+            </div>
+          </a>
+          <a href="graph.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">🕸️</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Compliance Graph</div>
+              <div class="nav-dropdown-item-desc">Visualize relationships</div>
+            </div>
+          </a>
+          <a href="documents.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">📄</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Document Intelligence</div>
+              <div class="nav-dropdown-item-desc">OCR & extraction</div>
+            </div>
+          </a>
+          <a href="regulatory.html" class="nav-dropdown-item">
+            <span class="nav-dropdown-item-icon">🔔</span>
+            <div class="nav-dropdown-item-content">
+              <div class="nav-dropdown-item-title">Regulatory Updates</div>
+              <div class="nav-dropdown-item-desc">Latest MAS notices</div>
+            </div>
+          </a>
+        </div>
+      </li>
+      <li><a href="supervisor.html">Supervisor</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <span class="text-gray">Agent: <strong>MAHADEVAN KARTIK</strong></span>
+      
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="portfolio-container">
+    <!-- Page Header -->
+    <div style="margin-bottom: var(--space-2xl);">
+      <h1 style="font-size: 32px; margin-bottom: var(--space-sm);">📊 Client Portfolio - Compliance Overview</h1>
+      <p style="color: var(--gray-600);">Monitor all your clients' existing policies and compliance health</p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Clients</div>
+        <div class="stat-value">47</div>
+        <div class="stat-change positive">↑ 3 this month</div>
+      </div>
+
+      <div class="stat-card" style="border-left-color: #10B981;">
+        <div class="stat-label">Compliant Clients</div>
+        <div class="stat-value">39</div>
+        <div class="stat-change positive">83% compliance rate</div>
+      </div>
+
+      <div class="stat-card" style="border-left-color: #F59E0B;">
+        <div class="stat-label">Needs Attention</div>
+        <div class="stat-value">6</div>
+        <div class="stat-change negative">⚠️ Review required</div>
+      </div>
+
+      <div class="stat-card" style="border-left-color: #EF4444;">
+        <div class="stat-label">Critical Issues</div>
+        <div class="stat-value">2</div>
+        <div class="stat-change negative">❌ Immediate action</div>
+      </div>
+    </div>
+
+    <!-- Platform Tools -->
+    <div style="background: white; padding: var(--space-xl); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); margin-bottom: var(--space-xl);">
+      <h2 style="font-size: 20px; margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm);">
+        🛠️ Platform Tools & Intelligence
+      </h2>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-lg);">
+        <!-- Analytics Tool -->
+        <a href="analytics.html" style="text-decoration: none; color: inherit;">
+          <div style="background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%); padding: var(--space-lg); border-radius: var(--radius-lg); color: white; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="font-size: 32px; margin-bottom: var(--space-sm);">📈</div>
+            <div style="font-weight: 700; font-size: 16px; margin-bottom: var(--space-xs);">Performance Analytics</div>
+            <div style="font-size: 13px; opacity: 0.9;">Track your metrics & anomalies</div>
+          </div>
+        </a>
+
+        <!-- Regulatory Tool -->
+        <a href="regulatory.html" style="text-decoration: none; color: inherit;">
+          <div style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); padding: var(--space-lg); border-radius: var(--radius-lg); color: white; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="font-size: 32px; margin-bottom: var(--space-sm);">🔔</div>
+            <div style="font-weight: 700; font-size: 16px; margin-bottom: var(--space-xs);">Regulatory Updates</div>
+            <div style="font-size: 13px; opacity: 0.9;">Latest MAS notices & rules</div>
+          </div>
+        </a>
+
+        <!-- Graph Engine Tool -->
+        <a href="graph.html" style="text-decoration: none; color: inherit;">
+          <div style="background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); padding: var(--space-lg); border-radius: var(--radius-lg); color: white; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="font-size: 32px; margin-bottom: var(--space-sm);">🕸️</div>
+            <div style="font-weight: 700; font-size: 16px; margin-bottom: var(--space-xs);">Compliance Graph</div>
+            <div style="font-size: 13px; opacity: 0.9;">Visualize relationships & patterns</div>
+          </div>
+        </a>
+
+        <!-- Document Intelligence Tool -->
+        <a href="documents.html" style="text-decoration: none; color: inherit;">
+          <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); padding: var(--space-lg); border-radius: var(--radius-lg); color: white; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="font-size: 32px; margin-bottom: var(--space-sm);">📄</div>
+            <div style="font-weight: 700; font-size: 16px; margin-bottom: var(--space-xs);">Document Intelligence</div>
+            <div style="font-size: 13px; opacity: 0.9;">OCR & automated extraction</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="filters-bar">
+      <div class="search-box">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search by client name, NRIC, or policy number...">
+        <span class="search-icon">🔍</span>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Status:</span>
+        <select class="form-select" id="statusFilter" style="min-width: 150px;">
+          <option value="all">All Clients</option>
+          <option value="compliant">Compliant</option>
+          <option value="warning">Needs Attention</option>
+          <option value="critical">Critical Issues</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Life Stage:</span>
+        <select class="form-select" id="lifeStageFilter" style="min-width: 150px;">
+          <option value="all">All Stages</option>
+          <option value="fresh">Fresh Entrants</option>
+          <option value="family">Starting Family</option>
+          <option value="parents">Supporting Parents</option>
+          <option value="preretire">Pre-Retirees</option>
+          <option value="golden">Golden Years</option>
+        </select>
+      </div>
+
+      <button class="btn btn-ghost btn-sm" onclick="window.location.href='analytics.html'">
+        📈 View Analytics
+      </button>
+    </div>
+
+    <!-- Client Table -->
+    <div class="client-table">
+      <div class="table-header">
+        <div>Client</div>
+        <div>Policies</div>
+        <div>Total Premium</div>
+        <div>Total Coverage</div>
+        <div>Last Review</div>
+        <div>Compliance</div>
+        <div>Issues</div>
+      </div>
+
+      <div id="clientRows">
+        <!-- Client rows will be populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Client Detail Modal -->
+  <div class="modal" id="clientModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h2 id="modalClientName" style="margin-bottom: 4px;">Client Name</h2>
+          <p id="modalClientMeta" style="color: var(--gray-600); font-size: var(--font-size-sm); margin: 0;"></p>
+        </div>
+        <button class="close-btn" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Policy details will be populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Chat Widget -->
+  <div class="chat-widget">
+    <button class="chat-widget-button" onclick="window.location.href='copilot.html'" title="Ask AI Copilot">
+      💬
+    </button>
+    <div class="chat-widget-tooltip">Ask AI Copilot</div>
+  </div>
+
+  <script>
+    // Sample client data
+    const clients = [
+      {
+        id: 1,
+        name: 'Tan Wei Ming',
+        nric: 'S8912345A',
+        age: 35,
+        lifeStage: 'Starting Family',
+        policies: 3,
+        totalPremium: 1200,
+        totalCoverage: 850000,
+        lastReview: '2025-09-15',
+        complianceScore: 92,
+        complianceStatus: 'excellent',
+        issues: [],
+        policyDetails: [
+          { type: 'Term Life', premium: 450, coverage: 500000, policyNumber: 'TL-2023-001234', startDate: '2023-01-15', status: 'Active' },
+          { type: 'Critical Illness', premium: 380, coverage: 250000, policyNumber: 'CI-2023-005678', startDate: '2023-03-20', status: 'Active' },
+          { type: 'Savings Plan', premium: 370, coverage: 100000, policyNumber: 'SP-2024-009876', startDate: '2024-06-10', status: 'Active' }
+        ]
+      },
+      {
+        id: 2,
+        name: 'Lim Siew Hoon',
+        nric: 'S7823456B',
+        age: 42,
+        lifeStage: 'Supporting Parents',
+        policies: 4,
+        totalPremium: 1850,
+        totalCoverage: 1200000,
+        lastReview: '2025-08-22',
+        complianceScore: 88,
+        complianceStatus: 'good',
+        issues: [],
+        policyDetails: [
+          { type: 'Whole Life', premium: 680, coverage: 400000, policyNumber: 'WL-2020-002345', startDate: '2020-05-12', status: 'Active' },
+          { type: 'Critical Illness', premium: 520, coverage: 300000, policyNumber: 'CI-2021-003456', startDate: '2021-07-18', status: 'Active' },
+          { type: 'Term Life', premium: 420, coverage: 400000, policyNumber: 'TL-2022-004567', startDate: '2022-02-25', status: 'Active' },
+          { type: 'Disability Income', premium: 230, coverage: 100000, policyNumber: 'DI-2023-005678', startDate: '2023-11-30', status: 'Active' }
+        ]
+      },
+      {
+        id: 3,
+        name: 'Chen Xiao Ming',
+        nric: 'S9234567C',
+        age: 28,
+        lifeStage: 'Fresh Entrants',
+        policies: 2,
+        totalPremium: 550,
+        totalCoverage: 600000,
+        lastReview: '2025-10-01',
+        complianceScore: 95,
+        complianceStatus: 'excellent',
+        issues: [],
+        policyDetails: [
+          { type: 'Term Life', premium: 280, coverage: 400000, policyNumber: 'TL-2024-006789', startDate: '2024-08-05', status: 'Active' },
+          { type: 'Critical Illness', premium: 270, coverage: 200000, policyNumber: 'CI-2024-007890', startDate: '2024-08-05', status: 'Active' }
+        ]
+      },
+      {
+        id: 4,
+        name: 'Kumar Rajesh',
+        nric: 'S6745678D',
+        age: 58,
+        lifeStage: 'Pre-Retirees',
+        policies: 5,
+        totalPremium: 2100,
+        totalCoverage: 800000,
+        lastReview: '2025-07-10',
+        complianceScore: 72,
+        complianceStatus: 'warning',
+        issues: ['Excessive Premium', 'Coverage Declining'],
+        policyDetails: [
+          { type: 'Whole Life', premium: 850, coverage: 250000, policyNumber: 'WL-2015-008901', startDate: '2015-03-22', status: 'Active' },
+          { type: 'Investment-Linked', premium: 600, coverage: 150000, policyNumber: 'ILP-2018-009012', startDate: '2018-09-14', status: 'Active' },
+          { type: 'Critical Illness', premium: 380, coverage: 200000, policyNumber: 'CI-2019-001123', startDate: '2019-11-08', status: 'Active' },
+          { type: 'Term Life', premium: 180, coverage: 150000, policyNumber: 'TL-2020-002234', startDate: '2020-01-15', status: 'Active' },
+          { type: 'Hospital Plan', premium: 90, coverage: 50000, policyNumber: 'HP-2021-003345', startDate: '2021-06-20', status: 'Active' }
+        ]
+      },
+      {
+        id: 5,
+        name: 'Wong Mei Ling',
+        nric: 'S8156789E',
+        age: 71,
+        lifeStage: 'Golden Years',
+        policies: 3,
+        totalPremium: 1200,
+        totalCoverage: 200000,
+        lastReview: '2024-11-20',
+        complianceScore: 48,
+        complianceStatus: 'poor',
+        issues: ['ILP Unsuitable', 'High Premium Ratio'],
+        policyDetails: [
+          { type: 'Investment-Linked', premium: 800, coverage: 80000, policyNumber: 'ILP-2023-004456', startDate: '2023-02-10', status: 'Active' },
+          { type: 'Whole Life', premium: 280, coverage: 100000, policyNumber: 'WL-2010-005567', startDate: '2010-07-15', status: 'Active' },
+          { type: 'Hospital Plan', premium: 120, coverage: 20000, policyNumber: 'HP-2022-006678', startDate: '2022-04-22', status: 'Active' }
+        ]
+      },
+      {
+        id: 6,
+        name: 'Lee Kian Seng',
+        nric: 'S7967890F',
+        age: 38,
+        lifeStage: 'Starting Family',
+        policies: 3,
+        totalPremium: 980,
+        totalCoverage: 750000,
+        lastReview: '2025-09-28',
+        complianceScore: 85,
+        complianceStatus: 'good',
+        issues: [],
+        policyDetails: [
+          { type: 'Term Life', premium: 420, coverage: 450000, policyNumber: 'TL-2022-007789', startDate: '2022-05-18', status: 'Active' },
+          { type: 'Critical Illness', premium: 360, coverage: 200000, policyNumber: 'CI-2023-008890', startDate: '2023-01-25', status: 'Active' },
+          { type: 'Savings Plan', premium: 200, coverage: 100000, policyNumber: 'SP-2024-009901', startDate: '2024-03-12', status: 'Active' }
+        ]
+      },
+      {
+        id: 7,
+        name: 'Fatimah Binte Hassan',
+        nric: 'S8878901G',
+        age: 33,
+        lifeStage: 'Starting Family',
+        policies: 2,
+        totalPremium: 720,
+        totalCoverage: 550000,
+        lastReview: '2025-08-14',
+        complianceScore: 90,
+        complianceStatus: 'excellent',
+        issues: [],
+        policyDetails: [
+          { type: 'Term Life', premium: 380, coverage: 350000, policyNumber: 'TL-2023-001012', startDate: '2023-06-08', status: 'Active' },
+          { type: 'Critical Illness', premium: 340, coverage: 200000, policyNumber: 'CI-2024-002123', startDate: '2024-01-20', status: 'Active' }
+        ]
+      },
+      {
+        id: 8,
+        name: 'David Ng Wei Jie',
+        nric: 'S6589012H',
+        age: 62,
+        lifeStage: 'Pre-Retirees',
+        policies: 4,
+        totalPremium: 1650,
+        totalCoverage: 550000,
+        lastReview: '2025-06-30',
+        complianceScore: 68,
+        complianceStatus: 'warning',
+        issues: ['Under-insured CI', 'Review Needed'],
+        policyDetails: [
+          { type: 'Whole Life', premium: 720, coverage: 200000, policyNumber: 'WL-2012-003234', startDate: '2012-09-10', status: 'Active' },
+          { type: 'Critical Illness', premium: 450, coverage: 150000, policyNumber: 'CI-2018-004345', startDate: '2018-12-05', status: 'Active' },
+          { type: 'Term Life', premium: 320, coverage: 150000, policyNumber: 'TL-2020-005456', startDate: '2020-03-18', status: 'Active' },
+          { type: 'Hospital Plan', premium: 160, coverage: 50000, policyNumber: 'HP-2021-006567', startDate: '2021-07-22', status: 'Active' }
+        ]
+      }
+    ];
+
+    // Render client rows
+    function renderClients(filteredClients = clients) {
+      const container = document.getElementById('clientRows');
+      container.innerHTML = '';
+
+      filteredClients.forEach(client => {
+        const row = document.createElement('div');
+        row.className = 'table-row';
+        row.onclick = () => openModal(client);
+
+        const daysSinceReview = Math.floor((new Date() - new Date(client.lastReview)) / (1000 * 60 * 60 * 24));
+        const reviewStatus = daysSinceReview > 365 ? '⚠️ ' : '';
+
+        const issueChips = client.issues.map(issue => {
+          const type = issue.includes('ILP') || issue.includes('High Premium') ? 'critical' : 'warning';
+          return `<span class="issue-chip ${type}">${issue}</span>`;
+        }).join('');
+
+        row.innerHTML = `
+          <div class="client-info">
+            <div class="client-name">${client.name}</div>
+            <div class="client-meta">${client.nric} • Age ${client.age} • ${client.lifeStage}</div>
+          </div>
+          <div>
+            <span class="policy-count">📄 ${client.policies} policies</span>
+          </div>
+          <div style="font-weight: 600;">$${client.totalPremium}/mo</div>
+          <div style="font-weight: 600;">$${client.totalCoverage.toLocaleString()}</div>
+          <div style="font-size: var(--font-size-sm); color: var(--gray-600);">
+            ${reviewStatus}${formatDate(client.lastReview)}
+          </div>
+          <div class="compliance-score-mini">
+            <div class="score-circle ${client.complianceStatus}">${client.complianceScore}</div>
+          </div>
+          <div class="issue-chips">
+            ${issueChips || '<span style="color: var(--gray-400); font-size: var(--font-size-xs);">None</span>'}
+          </div>
+        `;
+
+        container.appendChild(row);
+      });
+    }
+
+    // Format date
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const options = { year: 'numeric', month: 'short', day: 'numeric' };
+      return date.toLocaleDateString('en-SG', options);
+    }
+
+    // Open client detail modal
+    function openModal(client) {
+      const modal = document.getElementById('clientModal');
+      document.getElementById('modalClientName').textContent = client.name;
+      document.getElementById('modalClientMeta').textContent = `${client.nric} • Age ${client.age} • ${client.lifeStage}`;
+
+      const modalBody = document.getElementById('modalBody');
+
+      let html = `
+        <div style="background: linear-gradient(135deg, var(--aia-red) 0%, var(--aia-red-dark) 100%); color: white; padding: var(--space-lg); border-radius: var(--radius-md); margin-bottom: var(--space-xl);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-size: var(--font-size-sm); opacity: 0.9; margin-bottom: 4px;">Overall Compliance Score</div>
+              <div style="font-size: 48px; font-weight: 700;">${client.complianceScore}/100</div>
+              <div style="font-size: var(--font-size-sm); opacity: 0.9; margin-top: 4px;">
+                ${client.complianceScore >= 85 ? '✓ Excellent Compliance' : client.complianceScore >= 75 ? 'Good Compliance' : client.complianceScore >= 60 ? '⚠️ Needs Attention' : '❌ Critical Issues'}
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: var(--font-size-sm); opacity: 0.9;">Total Premium</div>
+              <div style="font-size: 32px; font-weight: 700;">$${client.totalPremium}</div>
+              <div style="font-size: var(--font-size-sm); opacity: 0.9;">per month</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Compliance issues
+      if (client.issues.length > 0) {
+        html += `
+          <div class="alert alert-error" style="margin-bottom: var(--space-xl);">
+            <span class="alert-icon">⚠️</span>
+            <div class="alert-content">
+              <div class="alert-title">Compliance Issues Detected</div>
+              <ul style="margin: var(--space-sm) 0 0 20px; padding: 0;">
+                ${client.issues.map(issue => `<li>${issue}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+        `;
+      }
+
+      html += '<h3 style="margin-bottom: var(--space-lg);">Active Policies (${client.policies})</h3>';
+
+      client.policyDetails.forEach((policy, index) => {
+        html += `
+          <div class="policy-card">
+            <div class="policy-header">
+              <div>
+                <div style="font-size: 18px; font-weight: 700; margin-bottom: 4px;">${policy.type}</div>
+                <div style="font-size: var(--font-size-xs); color: var(--gray-500);">Policy #${policy.policyNumber}</div>
+              </div>
+              <span class="badge badge-success">${policy.status}</span>
+            </div>
+            <div class="policy-details">
+              <div class="detail-item">
+                <div class="detail-label">Monthly Premium</div>
+                <div class="detail-value">$${policy.premium}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Coverage Amount</div>
+                <div class="detail-value">$${policy.coverage.toLocaleString()}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Start Date</div>
+                <div class="detail-value">${formatDate(policy.startDate)}</div>
+              </div>
+            </div>
+
+            ${getComplianceCheck(client, policy)}
+          </div>
+        `;
+      });
+
+      html += `
+        <div style="margin-top: var(--space-xl); padding-top: var(--space-xl); border-top: 2px solid var(--gray-200);">
+          <div style="display: flex; gap: var(--space-md);">
+            <button class="btn btn-primary" onclick="window.location.href='index.html'">📋 Schedule FHR Review</button>
+            <button class="btn btn-ghost" onclick="window.location.href='report.html'">📄 Generate Report</button>
+            <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+          </div>
+        </div>
+      `;
+
+      modalBody.innerHTML = html;
+      modal.classList.add('active');
+    }
+
+    // Get compliance check for policy
+    function getComplianceCheck(client, policy) {
+      let html = '<div style="margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--gray-300);">';
+
+      // ILP check for seniors
+      if (policy.type === 'Investment-Linked' && client.age >= 65) {
+        html += `
+          <div class="alert alert-error" style="margin: 0; padding: var(--space-sm) var(--space-md);">
+            <span class="alert-icon">❌</span>
+            <div class="alert-content" style="font-size: var(--font-size-sm);">
+              <strong>Policy Not Suitable:</strong> ILP not recommended for age 65+. Consider switching to annuity or whole life.
+            </div>
+          </div>
+        `;
+      }
+      // Check premium ratio
+      else if (client.totalPremium > 0) {
+        const estimatedIncome = (client.totalPremium / 0.15); // Assuming 15% ratio
+        const ratio = (client.totalPremium / estimatedIncome * 100).toFixed(1);
+
+        if (ratio > 15) {
+          html += `
+            <div class="alert alert-warning" style="margin: 0; padding: var(--space-sm) var(--space-md);">
+              <span class="alert-icon">⚠️</span>
+              <div class="alert-content" style="font-size: var(--font-size-sm);">
+                <strong>High Premium Ratio:</strong> Total premium (${ratio}%) exceeds MoneySense 15% guideline.
+              </div>
+            </div>
+          `;
+        } else {
+          html += `
+            <div style="color: var(--success-text); font-size: var(--font-size-sm); font-weight: 600;">
+              ✓ Policy complies with MoneySense guidelines
+            </div>
+          `;
+        }
+      }
+
+      html += '</div>';
+      return html;
+    }
+
+    // Close modal
+    function closeModal() {
+      document.getElementById('clientModal').classList.remove('active');
+    }
+
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      const filtered = clients.filter(client =>
+        client.name.toLowerCase().includes(searchTerm) ||
+        client.nric.toLowerCase().includes(searchTerm) ||
+        client.policyDetails.some(p => p.policyNumber.toLowerCase().includes(searchTerm))
+      );
+      renderClients(filtered);
+    });
+
+    // Status filter
+    document.getElementById('statusFilter').addEventListener('change', (e) => {
+      const status = e.target.value;
+      let filtered = clients;
+
+      if (status === 'compliant') {
+        filtered = clients.filter(c => c.complianceScore >= 85);
+      } else if (status === 'warning') {
+        filtered = clients.filter(c => c.complianceScore >= 60 && c.complianceScore < 85);
+      } else if (status === 'critical') {
+        filtered = clients.filter(c => c.complianceScore < 60);
+      }
+
+      renderClients(filtered);
+    });
+
+    // Life stage filter
+    document.getElementById('lifeStageFilter').addEventListener('change', (e) => {
+      const stage = e.target.value;
+      const filtered = stage === 'all' ? clients : clients.filter(c => c.lifeStage === stage);
+      renderClients(filtered);
+    });
+
+    // Close modal on background click
+    document.getElementById('clientModal').addEventListener('click', (e) => {
+      if (e.target.id === 'clientModal') {
+        closeModal();
+      }
+    });
+
+    // Initial render
+    renderClients();
+  </script>
+</body>
+</html>
